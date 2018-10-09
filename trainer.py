@@ -108,11 +108,12 @@ def process_fn(fn_input):
     x_vocab, x_oct, x_dur, x_vol, y_vocab, y_oct, y_dur, y_vol = data
     generative_length = len(y_vocab)
 
-    inp = Tensor([x_vocab, x_oct, x_dur, x_vol])
+    inp = [x_vocab, x_oct, x_dur, x_vol]
 
     trg = []
     for _ in range(len(y_vocab)):
         trg.append([Tensor(e) for e in [y_vocab[_], y_oct[_], y_dur[_], y_vol[_]]])
+        # trg.append([y_vocab[_], y_oct[_], y_dur[_], y_vol[_]])
 
     response = Vanilla.forward_prop(model, inp, gen_iterations=generative_length, filters=filters, dropout=dropout)
 
