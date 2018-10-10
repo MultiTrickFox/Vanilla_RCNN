@@ -12,7 +12,7 @@ default_filters = ((3,4),
                    (6,7,8),
                    (9,10,11))
 
-default_loss_multipliers = (1, 0.1, 0.1, 0.1)
+default_loss_multipliers = (1, 0.2, 0.2, 0.2)
 
 
 #   Structure
@@ -161,8 +161,7 @@ def forward_prop(model, sequence, context=None, gen_seed=None, gen_iterations=No
 def prop_timestep(model, sequence_t, context_t, filters, dropout):
 
     produced_outputs = []
-    produced_context = []                       # sequence_t = array of 4 tensors
-
+    produced_context = []
 
     # layer : presence_1
 
@@ -190,7 +189,7 @@ def prop_timestep(model, sequence_t, context_t, filters, dropout):
 
     if dropout != 0.0:
         drop = random.choices(range(len(state)), k=int(len(state) * dropout))
-        for _ in drop: state[_] = torch.Tensor(0)
+        for _ in drop: state[_] = 0
 
     produced_context.append(state)
 
@@ -232,7 +231,7 @@ def prop_timestep(model, sequence_t, context_t, filters, dropout):
 
     if dropout != 0.0:
         drop = random.choices(range(len(state)), k=int(len(state) * dropout))
-        for _ in drop: state[_] = torch.Tensor(0)
+        for _ in drop: state[_] = 0
 
     produced_context.append(state)
 
@@ -320,9 +319,9 @@ def loss_wrt_distance(output_seq, label_seq):
 
             loss = lbl_e - pred_e
 
-            # sequence_losses[_].append(loss.sum()) # todo unleash me bro
+            sequence_losses[_].append(loss.sum())
 
-            if _ == 0: sequence_losses[_].append(loss.sum())
+            # if _ == 0: sequence_losses[_].append(loss.sum())
 
     return sequence_losses
 
@@ -397,6 +396,7 @@ def init_states(model):
 
 
 stop_dur = 2.0
+
 
 def stop_cond(output_t):
 

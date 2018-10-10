@@ -30,7 +30,7 @@ filters = Vanilla.default_filters
 epochs = 20
 learning_rate = 0.001
 
-batch_size = 50 ; data_size = batch_size*4
+batch_size = 200 ; data_size = batch_size*10
 data_path = 'samples.pkl'
 
 train_basic = True
@@ -99,7 +99,8 @@ def train_rms(model, accu_grads, data, num_epochs=1):
             optimize_model(model, accu_grads, batch_size=batch_size, lr=learning_rate, alpha=rms_alpha)
 
         losses.append(epoch_loss)
-        print(f'epoch {epoch} loss {epoch_loss}') # todo : remove me
+        print(f'epoch {epoch} loss {epoch_loss}')               # todo : remove diese
+        res.write_loss_training(epoch_loss, True, epoch)
     return model, accu_grads, losses
 
 
@@ -110,11 +111,8 @@ def process_fn(fn_input):
     generative_length = len(y_vocab)
 
     inp = [x_vocab, x_oct, x_dur, x_vol]
-
-    trg = []
-    for _ in range(len(y_vocab)): # trg.append([y_vocab[_], y_oct[_], y_dur[_], y_vol[_]])
-        trg.append([Tensor(e) for e in [y_vocab[_], y_oct[_], y_dur[_], y_vol[_]]])
-
+    trg = [[Tensor(e) for e in [y_vocab[_], y_oct[_], y_dur[_], y_vol[_]]]
+           for _ in range(generative_length)]
 
     response = Vanilla.forward_prop(model, inp, gen_iterations=generative_length, filters=filters, dropout=dropout)
 
