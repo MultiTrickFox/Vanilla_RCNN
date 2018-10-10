@@ -25,8 +25,8 @@ filters = ((3, 4),
     # data details
 
 data_path = 'samples.pkl'
-data_size =100 # 10_000
-batch_size =10 # 400 # /2
+data_size = 10_000
+batch_size = 400 # /2
 
 
     # training details
@@ -35,7 +35,7 @@ start_advanced = False
 
 further_parenting = False
 
-trainer.dropout  = 0.0
+trainer.dropout = 0.1
 
 reducing_batch_sizes = True
 reduce_batch_per_epoch = 5

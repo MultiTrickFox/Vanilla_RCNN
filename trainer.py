@@ -30,7 +30,7 @@ filters = Vanilla.default_filters
 epochs = 20
 learning_rate = 0.001
 
-batch_size = 50 ; data_size = batch_size*2
+batch_size = 50 ; data_size = batch_size*4
 data_path = 'samples.pkl'
 
 train_basic = True
@@ -96,11 +96,10 @@ def train_rms(model, accu_grads, data, num_epochs=1):
 
                 epoch_loss += batch_loss
 
-
             optimize_model(model, accu_grads, batch_size=batch_size, lr=learning_rate, alpha=rms_alpha)
 
         losses.append(epoch_loss)
-
+        print(f'epoch {epoch} loss {epoch_loss}') # todo : remove me
     return model, accu_grads, losses
 
 
@@ -119,15 +118,11 @@ def process_fn(fn_input):
 
     response = Vanilla.forward_prop(model, inp, gen_iterations=generative_length, filters=filters, dropout=dropout)
 
-    loss_nodes = loss_fn(response, trg)
+    sequence_losses = loss_fn(response, trg)
 
-    Vanilla.update_gradients(loss_nodes)
+    loss = [float(sum(element)) for element in sequence_losses]
 
-    loss_len = len(loss_nodes)
-    loss = [float(sum(e)) for e in [loss_nodes[:int(loss_len/4)],
-                                    loss_nodes[int(loss_len/4) : int(loss_len/2)],
-                                    loss_nodes[int(loss_len/2) : 3*int(loss_len/4)],
-                                    loss_nodes[int(3*loss_len/4):]]]
+    Vanilla.update_gradients(sequence_losses)
 
     grads = Vanilla.return_grads(model)
 

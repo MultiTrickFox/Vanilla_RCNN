@@ -12,6 +12,8 @@ default_filters = ((3,4),
                    (6,7,8),
                    (9,10,11))
 
+default_loss_multipliers = (1, 0.1, 0.1, 0.1)
+
 
 #   Structure
 
@@ -306,7 +308,8 @@ def vector_convolve(vector, filter_values, filter_weights):
 
 
 def loss_wrt_distance(output_seq, label_seq):
-    sequence_losses = []
+
+    sequence_losses = [[],[],[],[]]
 
     for t in range(len(label_seq)):
         lbl = label_seq[t]
@@ -316,7 +319,10 @@ def loss_wrt_distance(output_seq, label_seq):
             pred_e = pred[_]
 
             loss = lbl_e - pred_e
-            sequence_losses.append(loss.sum())
+
+            # sequence_losses[_].append(loss.sum()) # todo unleash me bro
+
+            if _ == 0: sequence_losses[_].append(loss.sum())
 
     return sequence_losses
 
@@ -324,9 +330,12 @@ def loss_wrt_distance(output_seq, label_seq):
 #   Optimization
 
 
-def update_gradients(loss_nodes):
-    for node in loss_nodes:
-        node.backward(retain_graph=True)
+def update_gradients(sequence_loss, loss_multipliers=default_loss_multipliers):
+    for _,node in enumerate(sequence_loss):
+        multiplier = loss_multipliers[_]
+        for time_step in node:
+            time_step *= multiplier
+            time_step.backward(retain_graph=True)
 
 
 def update_model(model, batch_size=1, learning_rate=0.001):
@@ -334,7 +343,7 @@ def update_model(model, batch_size=1, learning_rate=0.001):
         for _,layer in enumerate(model):
             for __,weight in enumerate(layer.values()):
                 if weight.grad is not None:
-                    weight += learning_rate * weight.grad / batch_size
+                    weight -= learning_rate * weight.grad / batch_size
                     weight.grad = None
 
 
@@ -345,7 +354,7 @@ def update_model_momentum(model, moments, batch_size=1, alpha=0.9, beta=0.1):
                 if weight.grad is not None:
                     weight.grad /= batch_size
                     moments[_][__] = alpha * moments[_][__] + beta * weight.grad
-                    weight += moments[_][__]
+                    weight -= moments[_][__]
                     weight.grad = None
 
 
@@ -356,7 +365,7 @@ def update_model_rmsprop(model, accu_grads, batch_size=1, lr=0.01, alpha=0.9):
                 if weight.grad is not None:
                     weight.grad /= batch_size
                     accu_grads[_][__] = alpha * accu_grads[_][__] + (1 - alpha) * weight.grad**2
-                    weight += lr * weight.grad / (torch.sqrt(accu_grads[_][__]) + 1e-8)
+                    weight -= lr * weight.grad / (torch.sqrt(accu_grads[_][__]) + 1e-8)
                     weight.grad = None
 
 
@@ -373,7 +382,7 @@ def update_model_adam(model, accugrads, moments, epoch_nr, batch_size=1, lr=0.00
                     moment_hat = moments[_][__] / (1 - alpha_moments ** epoch_nr)
                     accugrad_hat = accugrads[_][__] / (1 - alpha_accugrads ** epoch_nr)
 
-                    weight += lr * moment_hat / (torch.sqrt(sum(accugrad_hat)) + 1e-8)
+                    weight -= lr * moment_hat / (torch.sqrt(sum(accugrad_hat)) + 1e-8)
                     weight.grad = None
 
 
@@ -387,7 +396,7 @@ def init_states(model):
     return [states_t0]
 
 
-import res ; stop_dur = res.SPLIT_DURATION
+stop_dur = 2.0
 
 def stop_cond(output_t):
 
