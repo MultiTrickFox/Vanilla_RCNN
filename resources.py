@@ -144,6 +144,8 @@ def load_model(model_id=None):
 
 def load_data(data_path, limit_size):
     raw_files = glob.glob(data_path)
+    random.shuffle(raw_files)
+
     data = []
     for file in raw_files:
         dataset = pickle_load(file)
@@ -157,11 +159,16 @@ def load_data(data_path, limit_size):
             blocks.append([vocab_X[_], oct_X[_], dur_X[_], vol_X[_],
                            vocab_Y[_], oct_Y[_], dur_Y[_], vol_Y[_]])
 
-        data.extend(random.choices(blocks, k=limit_size))
+        data.extend(blocks) # data.extend(random.choices(blocks, k=limit_size))
+        if len(data) > limit_size: break
+
     return data
 
 def get_datasize(data_path):
-    dataset = pickle_load(data_path)
+    files = glob.glob(data_path)
+    dataset = []
+    for file in files:
+        dataset.extend(pickle_load(file))
     return len(dataset[0][0])
 
 

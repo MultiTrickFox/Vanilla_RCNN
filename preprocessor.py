@@ -1,4 +1,5 @@
-import res
+import resources
+
 import glob
 from music21 import converter
 from multiprocessing import Pool, cpu_count
@@ -19,8 +20,6 @@ def preprocess(raw_files=glob.glob("samples/*.mid")):
 
     imported_files = []
 
-    print(f'\nDetected CPU(s): {cpu_count()}\n')
-
     with Pool(cpu_count()) as p:
 
         results = p.map_async(import_fn, raw_files)
@@ -31,7 +30,7 @@ def preprocess(raw_files=glob.glob("samples/*.mid")):
         for result in results.get():
             if result is not None:
                 imported_files.append(result)
-        print(f'Files Obtained: {len(results.get())}\n')
+        print(f'Files Obtained: {len(results.get())}')
 
     vocab_seqs_X, vocab_seqs_Y = [], []
     oct_seqs_X, oct_seqs_Y = [], []
@@ -63,7 +62,7 @@ def preprocess(raw_files=glob.glob("samples/*.mid")):
         [vocab_seqs_X, oct_seqs_X, dur_seqs_X, vol_seqs_X],
         [vocab_seqs_Y, oct_seqs_Y, dur_seqs_Y, vol_seqs_Y]]
 
-    print(f'Samples Collected: {len_samples}\n')
+    print(f'Samples Collected: {len_samples}')
 
     return data, len_samples
 
@@ -93,7 +92,7 @@ def parse_fn(stream):
             vol_seq_container.append(vol_vect)
 
             if split_cond(dur_vect):
-                
+
                 if min_seq_len <= len(vocab_seq_container) <= max_seq_len:
                     mstream.append([vocab_seq_container,
                                     oct_seq_container,
@@ -179,9 +178,9 @@ def vectorize_element(element):
 def duration_isValid(element): return 0.0 < float(element.duration.quarterLength) <= MAX_DURATION
 
 
-note_dict = res.note_dict
+note_dict = resources.note_dict
 
-note_reverse_dict = res.note_reverse_dict
+note_reverse_dict = resources.note_reverse_dict
 
 vocab_size = len(note_reverse_dict)
 
@@ -219,10 +218,11 @@ empty_vect = [0 for _ in range(vocab_size)]
 
 
 
-def parent_bootstrap():
+def preproc_bootstrap():
     raw_files = glob.glob("samples/*.mid")
     hm_files = len(raw_files)
-    print(f'Sample Files: {hm_files} detected.')
+    print(f'Sample Files: {hm_files}')
+    data_size = 0
     batch_len = int(hm_files / 10)
     hm_batches = int(hm_files / batch_len)
     for _ in range(hm_batches):
@@ -230,11 +230,12 @@ def parent_bootstrap():
         ptr2 = int((_ + 1) * batch_len)
         files = raw_files[ptr1:ptr2]
         data, __ = preprocess(raw_files=files)
-        res.pickle_save(data, 'samples_' + str(_) + '.pkl')
-        data = []
-        print(f'Batch {_} of {hm_batches} completed.')
-
+        resources.pickle_save(data, 'samples_' + str(_) + '.pkl')
+        data_size += len(data) ; data = []
+        print(f'Batch {_+1} of {hm_batches} completed.')
+    print(f'Total of {data_size} samples obtained.')
+    return data_size
 
 
 if __name__ == '__main__':
-    parent_bootstrap()
+    preproc_bootstrap()

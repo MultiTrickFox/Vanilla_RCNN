@@ -1,4 +1,4 @@
-import res
+import resources
 import torch
 import random
 import numpy as np
@@ -100,7 +100,7 @@ def train_rms(model, accu_grads, data, num_epochs=1):
 
         losses.append(epoch_loss)
         print(f'epoch {epoch} loss {epoch_loss}')               # todo : remove diese
-        res.write_loss_training(epoch_loss, True, epoch)
+        resources.write_loss_training(epoch_loss, True, epoch)
     return model, accu_grads, losses
 
 
@@ -141,12 +141,12 @@ def init_accugrads(model):
 
 def save_accugrads(accu_grads, model_id=None):
     model_id = '' if model_id is None else str(model_id)
-    res.pickle_save(accu_grads, 'model' + model_id + '_accugrads.pkl')
+    resources.pickle_save(accu_grads, 'model' + model_id + '_accugrads.pkl')
 
 def load_accugrads(model, model_id=None):
     model_id = '' if model_id is None else str(model_id)
     try:
-        accu_grads = res.pickle_load('model' + model_id + '_accugrads.pkl')
+        accu_grads = resources.pickle_load('model' + model_id + '_accugrads.pkl')
         print('> accugrads.pkl loaded.')
     except:
         print('> accugrads.pkl not found.')
@@ -165,12 +165,12 @@ def init_moments(model):
 
 def save_moments(moments, model_id=None):
     model_id = '' if model_id is None else str(model_id)
-    res.pickle_save(moments, 'model' + model_id + '_moments.pkl')
+    resources.pickle_save(moments, 'model' + model_id + '_moments.pkl')
 
 def load_moments(model, model_id=None):
     model_id = '' if model_id is None else str(model_id)
     try:
-        moments = res.pickle_load('model' + model_id + '_moments.pkl')
+        moments = resources.pickle_load('model' + model_id + '_moments.pkl')
         print('> moments.pkl loaded.')
     except:
         print('> moments.pkl not found.')
@@ -244,8 +244,8 @@ if __name__ == '__main__':
 
     torch.set_default_tensor_type('torch.FloatTensor')
 
-    data = res.load_data(data_path,data_size)
-    IOdims = res.vocab_size
+    data = resources.load_data(data_path, data_size)
+    IOdims = resources.vocab_size
 
     # # here is a sample datapoint (X & Y)..
     # print('X:')
@@ -257,7 +257,7 @@ if __name__ == '__main__':
 
         # RMS basic training
 
-        model = res.load_model()
+        model = resources.load_model()
         if model is None: model = Vanilla.create_model(filters)
 
         accu_grads = load_accugrads(model)
@@ -268,14 +268,14 @@ if __name__ == '__main__':
             data,
             num_epochs=epochs)
 
-        res.save_model(model)
+        resources.save_model(model)
         save_accugrads(accu_grads)
 
     else:
 
         # ADAM advanced training
 
-        model = res.load_model()
+        model = resources.load_model()
         if model is None: model = Vanilla.create_model(filters)
 
         accu_grads = load_accugrads(model)
@@ -288,6 +288,6 @@ if __name__ == '__main__':
             data,
             num_epochs=epochs)
 
-        res.save_model(model)
+        resources.save_model(model)
         save_accugrads(accu_grads)
         save_moments(moments)
