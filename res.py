@@ -143,19 +143,21 @@ def load_model(model_id=None):
 
 
 def load_data(data_path, limit_size):
+    raw_files = glob.glob(data_path)
+    data = []
+    for file in raw_files:
+        dataset = pickle_load(file)
 
-    dataset = pickle_load(data_path)
+        sample_X, sample_Y = dataset
+        vocab_X, oct_X, dur_X, vol_X = sample_X
+        vocab_Y, oct_Y, dur_Y, vol_Y = sample_Y
 
-    sample_X, sample_Y = dataset
-    vocab_X, oct_X, dur_X, vol_X = sample_X
-    vocab_Y, oct_Y, dur_Y, vol_Y = sample_Y
+        blocks = []
+        for _ in range(len(vocab_X)):
+            blocks.append([vocab_X[_], oct_X[_], dur_X[_], vol_X[_],
+                           vocab_Y[_], oct_Y[_], dur_Y[_], vol_Y[_]])
 
-    blocks = []
-    for _ in range(len(vocab_X)):
-        blocks.append([vocab_X[_], oct_X[_], dur_X[_], vol_X[_],
-                       vocab_Y[_], oct_Y[_], dur_Y[_], vol_Y[_]])
-
-    data = random.choices(blocks, k=limit_size)
+        data.extend(random.choices(blocks, k=limit_size))
     return data
 
 def get_datasize(data_path):

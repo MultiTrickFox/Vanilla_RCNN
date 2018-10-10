@@ -24,7 +24,7 @@ filters = ((3, 4),
 
     # data details
 
-data_path = 'samples.pkl'
+data_path = "samples_*.pkl"
 data_size = 1_000
 batch_size = 400 # /2
 
