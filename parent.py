@@ -3,7 +3,6 @@ import trainer
 import res
 
 import time
-import subprocess
 
 import torch
 import numpy as np
@@ -18,14 +17,16 @@ learning_rate_2 = 0.01
 
     # model details
 
-default_layers = [4, 3, 5]
+filters = ((3, 4),
+           (6,7,8),
+           (9,10,11))
 
 
     # data details
 
 data_path = 'samples.pkl'
-data_size = 10_000
-batch_size = 400 # /2
+data_size =100 # 10_000
+batch_size =10 # 400 # /2
 
 
     # training details
@@ -34,11 +35,7 @@ start_advanced = False
 
 further_parenting = False
 
-shutdown_after_complete = True
-
-trainer.drop_in  = 0.0
-trainer.drop_mid = 0.1
-trainer.drop_out = 0.0
+trainer.dropout  = 0.0
 
 reducing_batch_sizes = True
 reduce_batch_per_epoch = 5
@@ -186,7 +183,7 @@ def advanced_parenting(model, accugrads, moments, data):
 
         prev_model, prev_accugrads, prev_moments, prev_loss = prevStep
 
-        thisStep = trainer.train_rmsadv(prev_model, prev_accugrads, prev_moments, data, epoch_nr=successful_epochs) ; this_loss = thisStep[-1]
+        thisStep = trainer.train_adam(prev_model, prev_accugrads, prev_moments, data, epoch_nr=successful_epochs) ; this_loss = thisStep[-1]
 
         if all(np.array(this_loss[0]) < np.array(prev_loss[0])):
 
@@ -279,10 +276,9 @@ def get_clock(): return time.asctime(time.localtime(time.time())).split(' ')[3]
 def run_simple_parenting(data):
 
     # initialize model
-    IOdims = res.vocab_size
     model = res.load_model()
     if model is None:
-        model = Vanilla.create_model(IOdims, default_layers, IOdims)
+        model = Vanilla.create_model(filters)
     else:
         res.save_model(model, '_before_simple')
 
@@ -295,23 +291,20 @@ def run_simple_parenting(data):
     # extract metadata
     model = checkpoints[-1][0]
     accugrads = checkpoints[-1][1]
-    # losses = [list(cp[-1]) for cp in checkpoints]
 
     # save metadata
     res.save_model(model)
     trainer.save_accugrads(accugrads)
-    # [res.write_loss(loss, as_txt=True, epoch_nr=_) for _, loss in enumerate(losses)]
 
 
 def run_advanced_parenting(data):
 
     # initialize model
-    IOdims = res.vocab_size
     model = res.load_model()
     if model is None:
-        model = Vanilla.create_model(IOdims, default_layers, IOdims)
+        model = Vanilla.create_model(filters)
     else:
-        res.save_model(model, '_before_adv')
+        res.save_model(model, '_before_advanced')
 
     # initalize metadata
     accugrads = trainer.load_accugrads(model)
@@ -324,13 +317,11 @@ def run_advanced_parenting(data):
     model = checkpoints[-1][0]
     accugrads = checkpoints[-1][1]
     moments = checkpoints[-1][2]
-    # losses = [list(cp[-1]) for cp in checkpoints]
 
     # save metadata
     res.save_model(model)
     trainer.save_accugrads(accugrads)
     trainer.save_moments(moments)
-    # [res.write_loss(loss, as_txt=True, epoch_nr=_) for _, loss in enumerate(losses)]
 
 
 
@@ -353,86 +344,3 @@ if __name__ == '__main__':
     else:                       # OR start advanced
 
         run_advanced_parenting(data)
-
-    # end-of-parent
-
-    if not shutdown_after_complete:
-        utils.plot_loss_txts()
-    else:
-        subprocess.call(["shutdown","-s"])
-
-
-
-
-
-def parent_bootstrap(hm_data,
-                     batches_of=-99,
-                     total_ep=20,
-                     lr_1=0.001,
-                     lr_2=0.01,
-                     structure=(3, 5, 4),
-                     begin_advanced=False,
-                     extra_care=False,
-                     decay_batch_sizes=True,
-                     quicksaves=True,
-                     quality='N/A'):
-
-    global total_epochs 
-    total_epochs = total_ep
-    global data_size 
-    data_size = hm_data
-    global batch_size 
-    batch_size = batches_of
-    global learning_rate_1 
-    learning_rate_1 = lr_1
-    global learning_rate_2 
-    learning_rate_2 = lr_2
-    global layers 
-    layers = structure
-    global start_advanced 
-    start_advanced = begin_advanced
-    global further_parenting 
-    further_parenting = extra_care
-    global reducing_batch_sizes 
-    reducing_batch_sizes = decay_batch_sizes
-    global save_intermediate_model 
-    save_intermediate_model = quicksaves
-
-    # min_data = 20_000 ; high_quality :  # medium_quality :  # low_quality :
-
-    import multiprocessing
-    cpu_count = multiprocessing.cpu_count()
-    import os
-
-    if hm_data < 10_000:
-        print(f'Need more data. {hm_data} < 10_000')
-        os.remove('samples.pkl')
-        return
-    else:
-        data_size = int(hm_data * 3/4)
-        hm_10s = int(data_size / 10_000)
-        data_size = hm_10s * 10_000
-
-        if quality == 'medium':
-            batch_size = cpu_count * 3
-        elif quality == 'high':
-            batch_size = cpu_count * 2
-        elif quality == 'low':
-            batch_size = cpu_count * 5
-
-        if batches_of == -99:
-            if data_size >= 50_000:
-                batch_size = 400
-            else:
-                batch_size = 200
-
-        trainer.batch_size = batch_size
-        res.initialize_loss_txt()
-        data = get_data()
-
-        if not start_advanced:
-            run_simple_parenting(data)
-
-            if further_parenting: run_advanced_parenting(data)
-
-        else: run_advanced_parenting(data)

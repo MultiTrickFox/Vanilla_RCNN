@@ -20,25 +20,26 @@ loss_fn = Vanilla.loss_wrt_distance
 
     # filter struct
 
+
 filters = Vanilla.default_filters
 
+
     # basic params
+
 
 epochs = 20
 learning_rate = 0.001
 
-batch_size = 400 ; data_size = batch_size * 2
+batch_size = 50 ; data_size = batch_size*2
 data_path = 'samples.pkl'
 
 train_basic = True
 
+
     # advanced params
 
-rms_alpha = 0.9
 
-rmsadv_alpha_moment = 0.2
-rmsadv_beta_moment = 0.8
-rmsadv_alpha_accugrad = 0.9
+rms_alpha = 0.9
 
 adam_alpha_moment = 0.9
 adam_alpha_accugrad = 0.999
@@ -89,11 +90,12 @@ def train_rms(model, accu_grads, data, num_epochs=1):
                     loss, grads = result
 
                     Vanilla.apply_grads(model,grads)
-                    batch_loss -= loss
+                    batch_loss += loss
 
                 # handle
 
                 epoch_loss += batch_loss
+
 
             optimize_model(model, accu_grads, batch_size=batch_size, lr=learning_rate, alpha=rms_alpha)
 
@@ -111,9 +113,9 @@ def process_fn(fn_input):
     inp = [x_vocab, x_oct, x_dur, x_vol]
 
     trg = []
-    for _ in range(len(y_vocab)):
+    for _ in range(len(y_vocab)): # trg.append([y_vocab[_], y_oct[_], y_dur[_], y_vol[_]])
         trg.append([Tensor(e) for e in [y_vocab[_], y_oct[_], y_dur[_], y_vol[_]]])
-        # trg.append([y_vocab[_], y_oct[_], y_dur[_], y_vol[_]])
+
 
     response = Vanilla.forward_prop(model, inp, gen_iterations=generative_length, filters=filters, dropout=dropout)
 
@@ -278,7 +280,7 @@ if __name__ == '__main__':
 
     else:
 
-        # ADAM training
+        # ADAM advanced training
 
         model = res.load_model()
         if model is None: model = Vanilla.create_model(filters)
