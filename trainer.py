@@ -1,4 +1,4 @@
-import res
+import resources
 import torch
 import random
 import numpy as np
@@ -30,8 +30,13 @@ filters = Vanilla.default_filters
 epochs = 20
 learning_rate = 0.001
 
+<<<<<<< HEAD
 batch_size = 400 ; data_size = batch_size*4
 data_path = 'samples.pkl'
+=======
+batch_size = 400 ; data_size = batch_size*5
+data_path = "samples_*.pkl"
+>>>>>>> af628cbc48fef8f6517b5810b376b1d67c653905
 
 train_basic = True
 
@@ -46,6 +51,7 @@ adam_alpha_accugrad = 0.999
 
 dropout = 0.0
 
+loss_nultip = (1, 0.001, 0.001, 0.001)
 
     # # #
 
@@ -100,7 +106,7 @@ def train_rms(model, accu_grads, data, num_epochs=1):
 
         losses.append(epoch_loss)
         print(f'epoch {epoch} loss {epoch_loss}')               # todo : remove diese
-        res.write_loss_training(epoch_loss, True, epoch)
+        resources.write_loss_training(epoch_loss, True, epoch)
     return model, accu_grads, losses
 
 
@@ -120,7 +126,7 @@ def process_fn(fn_input):
 
     loss = [float(sum(element)) for element in sequence_losses]
 
-    Vanilla.update_gradients(sequence_losses)
+    Vanilla.update_gradients(sequence_losses, loss_multipliers=loss_nultip)
 
     grads = Vanilla.return_grads(model)
 
@@ -141,12 +147,12 @@ def init_accugrads(model):
 
 def save_accugrads(accu_grads, model_id=None):
     model_id = '' if model_id is None else str(model_id)
-    res.pickle_save(accu_grads, 'model' + model_id + '_accugrads.pkl')
+    resources.pickle_save(accu_grads, 'model' + model_id + '_accugrads.pkl')
 
 def load_accugrads(model, model_id=None):
     model_id = '' if model_id is None else str(model_id)
     try:
-        accu_grads = res.pickle_load('model' + model_id + '_accugrads.pkl')
+        accu_grads = resources.pickle_load('model' + model_id + '_accugrads.pkl')
         print('> accugrads.pkl loaded.')
     except:
         print('> accugrads.pkl not found.')
@@ -165,12 +171,12 @@ def init_moments(model):
 
 def save_moments(moments, model_id=None):
     model_id = '' if model_id is None else str(model_id)
-    res.pickle_save(moments, 'model' + model_id + '_moments.pkl')
+    resources.pickle_save(moments, 'model' + model_id + '_moments.pkl')
 
 def load_moments(model, model_id=None):
     model_id = '' if model_id is None else str(model_id)
     try:
-        moments = res.pickle_load('model' + model_id + '_moments.pkl')
+        moments = resources.pickle_load('model' + model_id + '_moments.pkl')
         print('> moments.pkl loaded.')
     except:
         print('> moments.pkl not found.')
@@ -244,8 +250,8 @@ if __name__ == '__main__':
 
     torch.set_default_tensor_type('torch.FloatTensor')
 
-    data = res.load_data(data_path,data_size)
-    IOdims = res.vocab_size
+    data = resources.load_data(data_path, data_size)
+    IOdims = resources.vocab_size
 
     # # here is a sample datapoint (X & Y)..
     # print('X:')
@@ -257,7 +263,7 @@ if __name__ == '__main__':
 
         # RMS basic training
 
-        model = res.load_model()
+        model = resources.load_model()
         if model is None: model = Vanilla.create_model(filters)
 
         accu_grads = load_accugrads(model)
@@ -268,7 +274,7 @@ if __name__ == '__main__':
             data,
             num_epochs=epochs)
 
-        res.save_model(model)
+        resources.save_model(model)
         save_accugrads(accu_grads)
 
     else:
@@ -288,6 +294,6 @@ if __name__ == '__main__':
             data,
             num_epochs=epochs)
 
-        res.save_model(model)
+        resources.save_model(model)
         save_accugrads(accu_grads)
         save_moments(moments)

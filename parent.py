@@ -1,6 +1,6 @@
 import Vanilla
 import trainer
-import res
+import resources
 
 import time
 
@@ -17,15 +17,15 @@ learning_rate_2 = 0.01
 
     # model details
 
-filters = ((3, 4),
+filters = ((3,4),
            (6,7,8),
            (9,10,11))
 
 
     # data details
 
-data_path = 'samples.pkl'
-data_size = 1_000
+data_path = "samples_*.pkl"
+data_size = 500 # todo: re-adjust dis ,
 batch_size = 400 # /2
 
 
@@ -35,7 +35,7 @@ start_advanced = False
 
 further_parenting = False
 
-trainer.dropout = 0.1
+trainer.dropout = 0.0
 
 reducing_batch_sizes = True
 reduce_batch_per_epoch = 5
@@ -90,7 +90,7 @@ def simple_parenting(model, accugrads, data):
 
             print(f'@ {get_clock()} : '
                   f'.  epoch {successful_epochs} / {total_epochs} completed. ')
-            res.write_loss(this_loss[0], as_txt=True, epoch_nr=successful_epochs)
+            resources.write_loss(this_loss[0], as_txt=True, epoch_nr=successful_epochs)
 
             if reducing_batch_sizes and successful_epochs % reduce_batch_per_epoch == 0:
                 trainer.batch_size = int(trainer.batch_size * reduce_ratio)
@@ -98,7 +98,7 @@ def simple_parenting(model, accugrads, data):
 
             if save_intermediate_model and successful_epochs % save_model_per_epoch == 0:
                 ctr_save_id +=1 ; save_id = ctr_save_id * 0.001
-                res.save_model(prevStep[0], save_id)
+                resources.save_model(prevStep[0], save_id)
                 trainer.save_accugrads(prevStep[1], save_id)
                 print(f'Data saved : {ctr_save_id}')
 
@@ -137,14 +137,14 @@ def simple_parenting(model, accugrads, data):
 
                         print(f'@ {get_clock()} : '
                               f'.  epoch {successful_epochs} / {total_epochs} completed. ')
-                        res.write_loss(this_loss[0], as_txt=True, epoch_nr=successful_epochs)
+                        resources.write_loss(this_loss[0], as_txt=True, epoch_nr=successful_epochs)
 
                         if reducing_batch_sizes and successful_epochs % reduce_batch_per_epoch == 0:
                             trainer.batch_size = int(trainer.batch_size * reduce_ratio)
 
                         if save_intermediate_model and successful_epochs % save_model_per_epoch == 0:
                             ctr_save_id +=1 ; save_id = ctr_save_id * 0.001
-                            res.save_model(branch_prevStep[0], save_id)
+                            resources.save_model(branch_prevStep[0], save_id)
                             trainer.save_accugrads(branch_prevStep[1], save_id)
 
                         break
@@ -193,14 +193,14 @@ def advanced_parenting(model, accugrads, moments, data):
 
             print(f'@ {get_clock()} : '
                   f'.  epoch {successful_epochs} / {total_epochs} completed.')
-            res.write_loss(this_loss[0], as_txt=True, epoch_nr=successful_epochs)
+            resources.write_loss(this_loss[0], as_txt=True, epoch_nr=successful_epochs)
 
             if reducing_batch_sizes and successful_epochs % reduce_batch_per_epoch == 0:
                 trainer.batch_size = int(trainer.batch_size * 4/5)
 
             if save_intermediate_model and successful_epochs % save_model_per_epoch == 0:
                 ctr_save_id +=1 ; save_id = ctr_save_id * 0.001
-                res.save_model(prevStep[0], save_id)
+                resources.save_model(prevStep[0], save_id)
                 trainer.save_accugrads(prevStep[1], save_id)
                 trainer.save_moments(prevStep[2], save_id)
 
@@ -239,14 +239,14 @@ def advanced_parenting(model, accugrads, moments, data):
 
                         print(f'@ {get_clock()} : '
                               f'.  epoch {successful_epochs} / {total_epochs} completed. ')
-                        res.write_loss(this_loss[0], as_txt=True, epoch_nr=successful_epochs)
+                        resources.write_loss(this_loss[0], as_txt=True, epoch_nr=successful_epochs)
 
                         if reducing_batch_sizes and successful_epochs % reduce_batch_per_epoch == 0:
                             trainer.batch_size = int(trainer.batch_size * 4/5)
 
                         if save_intermediate_model and successful_epochs % save_model_per_epoch == 0:
                             ctr_save_id +=1 ; save_id = ctr_save_id * 0.001
-                            res.save_model(branch_prevStep[0], save_id)
+                            resources.save_model(branch_prevStep[0], save_id)
                             trainer.save_accugrads(branch_prevStep[1], save_id)
                             trainer.save_moments(branch_prevStep[2], save_id)
 
@@ -264,7 +264,7 @@ def advanced_parenting(model, accugrads, moments, data):
 
 # helpers
 
-def get_data(): return res.load_data(data_path, data_size)
+def get_data(): return resources.load_data(data_path, data_size)
 
 def get_clock(): return time.asctime(time.localtime(time.time())).split(' ')[3]
 
@@ -276,11 +276,11 @@ def get_clock(): return time.asctime(time.localtime(time.time())).split(' ')[3]
 def run_simple_parenting(data):
 
     # initialize model
-    model = res.load_model()
+    model = resources.load_model()
     if model is None:
         model = Vanilla.create_model(filters)
     else:
-        res.save_model(model, '_before_simple')
+        resources.save_model(model, '_before_simple')
 
     # initialize metadata
     accugrads = trainer.load_accugrads(model)
@@ -293,18 +293,18 @@ def run_simple_parenting(data):
     accugrads = checkpoints[-1][1]
 
     # save metadata
-    res.save_model(model)
+    resources.save_model(model)
     trainer.save_accugrads(accugrads)
 
 
 def run_advanced_parenting(data):
 
     # initialize model
-    model = res.load_model()
+    model = resources.load_model()
     if model is None:
         model = Vanilla.create_model(filters)
     else:
-        res.save_model(model, '_before_advanced')
+        resources.save_model(model, '_before_advanced')
 
     # initalize metadata
     accugrads = trainer.load_accugrads(model)
@@ -319,28 +319,32 @@ def run_advanced_parenting(data):
     moments = checkpoints[-1][2]
 
     # save metadata
-    res.save_model(model)
+    resources.save_model(model)
     trainer.save_accugrads(accugrads)
     trainer.save_moments(moments)
 
 
 
-if __name__ == '__main__':
-
-    res.initialize_loss_txt() ; torch.set_default_tensor_type('torch.FloatTensor')
+def parent_bootstrap():
+    resources.initialize_loss_txt() ; torch.set_default_tensor_type('torch.FloatTensor')
 
     data = get_data()
 
     trainer.batch_size = batch_size
 
-    if not start_advanced:      # start simple
+    if not start_advanced:  # start simple
 
         run_simple_parenting(data)
 
-        if further_parenting:   # then further parent
+        if further_parenting:  # then further parent
 
             run_advanced_parenting(data)
 
-    else:                       # OR start advanced
+    else:  # OR start advanced
 
         run_advanced_parenting(data)
+
+
+if __name__ == '__main__':
+
+    parent_bootstrap()

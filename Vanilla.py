@@ -8,11 +8,11 @@ vector_size = 13
 max_prop_time = 20
 
 
-default_filters = ((3,4),
-                   (6,7,8),
+default_filters = ((1,2,3,4),
+                   (5,6,7,8,9),
                    (9,10,11))
 
-default_loss_multipliers = (1, 0.2, 0.2, 0.2)
+default_loss_multipliers = (1, 0.02, 0.002, 0.002)
 
 
 #   Structure
