@@ -160,7 +160,10 @@ def load_data(data_path, limit_size):
                            vocab_Y[_], oct_Y[_], dur_Y[_], vol_Y[_]])
 
         data.extend(blocks) # data.extend(random.choices(blocks, k=limit_size))
-        if len(data) > limit_size: break
+        if len(data) > limit_size:
+
+            data = data[:limit_size]
+            break
 
     return data
 
@@ -171,6 +174,9 @@ def get_datasize(data_path):
         dataset.extend(pickle_load(file))
     return len(dataset[0][0])
 
+def batchify(resource, batch_size):
+    data_size = len(resource)
+    # todo: do
 
 
 def plot_loss_txts(hm_mins_refresh=2):

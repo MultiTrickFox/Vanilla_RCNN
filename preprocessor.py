@@ -6,13 +6,14 @@ from multiprocessing import Pool, cpu_count
 
 
 min_seq_len = 5
-max_seq_len = 30
+max_seq_len = 25
 
 MAX_OCTAVE = 7
 MAX_DURATION = 8
 SPLIT_DURATION = 2  # of 16th notes
 MAX_VOLUME = 127
 
+batch_div = 10 # 10 / 15 / 20
 show_passed_exceptions = False
 
 
@@ -30,7 +31,7 @@ def preprocess(raw_files=glob.glob("samples/*.mid")):
         for result in results.get():
             if result is not None:
                 imported_files.append(result)
-        print(f'Files Obtained: {len(results.get())}')
+        # print(f'Files Obtained: {len(results.get())}')
 
     vocab_seqs_X, vocab_seqs_Y = [], []
     oct_seqs_X, oct_seqs_Y = [], []
@@ -54,7 +55,6 @@ def preprocess(raw_files=glob.glob("samples/*.mid")):
                 dur_seqs_Y.extend(result[5])
                 vol_seqs_X.extend(result[6])
                 vol_seqs_Y.extend(result[7])
-        print()
 
     len_samples = len(vocab_seqs_X)
 
@@ -62,7 +62,7 @@ def preprocess(raw_files=glob.glob("samples/*.mid")):
         [vocab_seqs_X, oct_seqs_X, dur_seqs_X, vol_seqs_X],
         [vocab_seqs_Y, oct_seqs_Y, dur_seqs_Y, vol_seqs_Y]]
 
-    print(f'Samples Collected: {len_samples}')
+    # print(f'Samples Collected: {len_samples}')
 
     return data, len_samples
 
@@ -219,20 +219,24 @@ empty_vect = [0 for _ in range(vocab_size)]
 
 
 def preproc_bootstrap():
+    global batch_div
+
     raw_files = glob.glob("samples/*.mid")
     hm_files = len(raw_files)
     print(f'Sample Files: {hm_files}')
     data_size = 0
-    batch_len = int(hm_files / 10)
+    batch_len = int(hm_files / batch_div)
     hm_batches = int(hm_files / batch_len)
     for _ in range(hm_batches):
+        batch_id = _+1
         ptr1 = int(_ * batch_len)
         ptr2 = int((_ + 1) * batch_len)
         files = raw_files[ptr1:ptr2]
-        data, __ = preprocess(raw_files=files)
-        resources.pickle_save(data, 'samples_' + str(_) + '.pkl')
-        data_size += len(data) ; data = []
-        print(f'Batch {_+1} of {hm_batches} completed.')
+        data, len_data = preprocess(raw_files=files)
+        resources.pickle_save(data, 'samples_' + str(batch_id) + '.pkl')
+        data_size += len_data ; data = None
+
+        print(f'Batch {batch_id} of {hm_batches} completed. : {len_data} samples')
     print(f'Total of {data_size} samples obtained.')
     return data_size
 

@@ -17,7 +17,7 @@ learning_rate_2 = 0.01
 
     # model details
 
-filters = ((3, 4),
+filters = ((3,4),
            (6,7,8),
            (9,10,11))
 
@@ -35,7 +35,7 @@ start_advanced = False
 
 further_parenting = False
 
-trainer.dropout = 0.1
+trainer.dropout = 0.0
 
 reducing_batch_sizes = True
 reduce_batch_per_epoch = 5

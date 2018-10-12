@@ -30,7 +30,7 @@ filters = Vanilla.default_filters
 epochs = 20
 learning_rate = 0.001
 
-batch_size = 200 ; data_size = batch_size*10
+batch_size = 400 ; data_size = batch_size*5
 data_path = "samples_*.pkl"
 
 train_basic = True
@@ -46,6 +46,7 @@ adam_alpha_accugrad = 0.999
 
 dropout = 0.0
 
+loss_nultip = (1, 0.001, 0.001, 0.001)
 
     # # #
 
@@ -120,7 +121,7 @@ def process_fn(fn_input):
 
     loss = [float(sum(element)) for element in sequence_losses]
 
-    Vanilla.update_gradients(sequence_losses)
+    Vanilla.update_gradients(sequence_losses, loss_multipliers=loss_nultip)
 
     grads = Vanilla.return_grads(model)
 
