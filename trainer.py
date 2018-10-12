@@ -30,8 +30,13 @@ filters = Vanilla.default_filters
 epochs = 20
 learning_rate = 0.001
 
+<<<<<<< HEAD
 batch_size = 20 ; data_size = batch_size * 5
 data_path = 'samples.pkl'
+=======
+batch_size = 400 ; data_size = batch_size*20
+data_path = "samples_*.pkl"
+>>>>>>> 0950a50430972e47217e0ff1846b317bc2c43129
 
 train_basic = True
 
