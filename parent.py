@@ -29,7 +29,7 @@ filters = (*filters[0], *filters[-1])
     # data details
 
 data_path = "samples_*.pkl"
-data_size = 1_000 # todo: re-adjust dis ,
+data_size = 10_000 # todo: re-adjust dis ,
 batch_size = 400 # /2
 
 
@@ -86,7 +86,7 @@ def simple_parenting(model, accugrads, data):
 
         thisStep = trainer.train_rms(prev_model, prev_accugrads, data) ; this_loss = thisStep[-1]
 
-        if all(np.array(this_loss[0]) < np.array(prev_loss[0])):
+        if all(np.array(this_loss[0]) <= np.array(prev_loss[0])):
 
             checkpoints.append(prevStep)
 
@@ -127,11 +127,11 @@ def simple_parenting(model, accugrads, data):
 
                 branch_thisStep = trainer.train_rms(prev_model, prev_accugrads, data) ; this_loss = branch_thisStep[-1]
 
-                if all(np.array(this_loss[0]) < np.array(prev_loss[0])):
+                if all(np.array(this_loss[0]) <= np.array(prev_loss[0])):
 
                     branch_points.append(branch_prevStep)
 
-                    if all(np.array(this_loss[0]) < np.array(branch_goal[0])):
+                    if all(np.array(this_loss[0]) <= np.array(branch_goal[0])):
 
                         prevStep = branch_prevStep
 
