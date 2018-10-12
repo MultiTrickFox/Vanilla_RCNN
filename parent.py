@@ -29,7 +29,7 @@ filters = (*filters[0], *filters[-1])
     # data details
 
 data_path = "samples_*.pkl"
-data_size = 10_000 # todo: re-adjust dis ,
+data_size = 20_000 # todo: re-adjust dis ,
 batch_size = 400 # /2
 
 
