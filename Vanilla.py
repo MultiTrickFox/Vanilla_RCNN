@@ -25,35 +25,45 @@ def create_model(filters=default_filters):
 
     # layer : presence_1
 
+    in_size = vector_size*hm_vectors
+
     model.append(
         {
-            'vr':torch.randn([hm_vectors,1], requires_grad=True),
+            'vr1':torch.randn([in_size,in_size/2], requires_grad=True),
+            'vr2':torch.randn([in_size/2,vector_size], requires_grad=True),
             'ur':torch.randn([vector_size,vector_size], requires_grad=True),
-            'br':torch.zeros([vector_size,1], requires_grad=True),
+            'br':torch.zeros([1,vector_size], requires_grad=True),
 
-            'va':torch.randn([hm_vectors,1], requires_grad=True),
+            'va1':torch.randn([in_size,in_size/2], requires_grad=True),
+            'va2':torch.randn([in_size/2,vector_size], requires_grad=True),
             'ua':torch.randn([vector_size,vector_size], requires_grad=True),
-            'ba':torch.zeros([vector_size,1], requires_grad=True),
+            'ba':torch.zeros([1,vector_size], requires_grad=True),
 
-            'vs':torch.randn([hm_vectors,1], requires_grad=True),
-            'bs':torch.zeros([vector_size,1], requires_grad=True),
+            'vs1':torch.randn([in_size,in_size/2], requires_grad=True),
+            'vs2':torch.randn([in_size/2,vector_size], requires_grad=True),
+            'bs':torch.zeros([1,vector_size], requires_grad=True),
         }
     )
 
     # layer : presence_2
 
+    in_size = vector_size*hm_filters
+
     model.append(
         {
-            'vr':torch.randn([hm_filters,1], requires_grad=True),
+            'vr1':torch.randn([in_size,in_size/2], requires_grad=True),
+            'vr2':torch.randn([in_size/2,vector_size], requires_grad=True),
             'ur':torch.randn([vector_size,vector_size], requires_grad=True),
-            'br':torch.zeros([vector_size,1], requires_grad=True),
+            'br':torch.zeros([1,vector_size], requires_grad=True),
 
-            'va':torch.randn([hm_filters,1], requires_grad=True),
+            'va1':torch.randn([in_size,in_size/2], requires_grad=True),
+            'va2':torch.randn([in_size/2,vector_size], requires_grad=True),
             'ua':torch.randn([vector_size,vector_size], requires_grad=True),
-            'ba':torch.zeros([vector_size,1], requires_grad=True),
+            'ba':torch.zeros([1,vector_size], requires_grad=True),
 
-            'vs':torch.randn([hm_filters,1], requires_grad=True),
-            'bs':torch.zeros([vector_size,1], requires_grad=True),
+            'vs1':torch.randn([in_size,in_size/2], requires_grad=True),
+            'vs2':torch.randn([in_size/2,vector_size], requires_grad=True),
+            'bs':torch.zeros([1,vector_size], requires_grad=True),
         }
     )
 
@@ -69,19 +79,19 @@ def create_model(filters=default_filters):
     # layer : decision
 
     layer = {
-        'vr':torch.randn([vector_size,1], requires_grad=True),
+        'vr':torch.randn([1,vector_size], requires_grad=True),
         'ur':torch.randn([vector_size,vector_size], requires_grad=True),
         'br':torch.zeros([vector_size,1], requires_grad=True),
 
-        'vf':torch.randn([vector_size,1], requires_grad=True),
+        'vf':torch.randn([1,vector_size], requires_grad=True),
         'uf':torch.randn([vector_size,vector_size], requires_grad=True),
         'bf':torch.zeros([vector_size,1], requires_grad=True),
 
-        'va':torch.randn([vector_size,1], requires_grad=True),
+        'va':torch.randn([1,vector_size], requires_grad=True),
         'ua':torch.randn([vector_size,vector_size], requires_grad=True),
         'ba':torch.zeros([vector_size,1], requires_grad=True),
 
-        'vs':torch.randn([vector_size,1], requires_grad=True),
+        'vs':torch.randn([1,vector_size], requires_grad=True),
         'us':torch.randn([vector_size,vector_size], requires_grad=True),
         'bs':torch.zeros([vector_size,1], requires_grad=True),
     }
@@ -165,22 +175,23 @@ def prop_timestep(model, sequence_t, context_t, filters, dropout):
 
     # layer : presence_1
 
-    input = torch.stack(sequence_t, 1)
+    input = torch.cat(sequence_t)
+    input = torch.zeros([1, len(input)], requires_grad=False) + input
 
     remember = torch.sigmoid(
-        torch.matmul(input, model[0]['vr']) +
-        torch.matmul(model[0]['ur'], context_t[0]) +
+        torch.matmul(torch.relu(torch.matmul(input, model[0]['vr1'])), model[0]['vr2']) +
+        torch.matmul(context_t[0], model[0]['ur']) +
         model[0]['br']
     )
 
     attention = torch.tanh(
-        torch.matmul(input, model[0]['va']) +
-        torch.matmul(model[0]['ua'], context_t[0]) +
+        torch.matmul(torch.relu(torch.matmul(input, model[0]['va1'])), model[0]['va2']) +
+        torch.matmul(context_t[0], model[0]['ua']) +
         model[0]['ba']
     )
 
     short_mem = torch.tanh(
-        torch.matmul(input, model[0]['vs']) +
+        torch.matmul(torch.relu(torch.matmul(input, model[0]['vr1'])), model[0]['vs2']) +
         attention * context_t[0] +
         model[0]['bs']
     )
@@ -205,29 +216,30 @@ def prop_timestep(model, sequence_t, context_t, filters, dropout):
 
     # layer : presence_2
 
-    input = torch.stack(convolutions, 1)
+    input = torch.cat(convolutions)
+    input = torch.zeros([1, len(input)], requires_grad=False) + input
 
     remember = torch.sigmoid(
-        torch.matmul(input, model[1]['vr']) +
-        torch.matmul(model[1]['ur'], context_t[1]) +
+        torch.matmul(torch.relu(torch.matmul(input, model[1]['vr1'])), model[1]['vr2']) +
+        torch.matmul(context_t[1], model[1]['ur']) +
         model[1]['br']
     )
 
     attention = torch.tanh(
-        torch.matmul(input, model[1]['va']) +
-        torch.matmul(model[1]['ua'], context_t[1]) +
+        torch.matmul(torch.relu(torch.matmul(input, model[1]['va1'])), model[1]['va2']) +
+        torch.matmul(context_t[1], model[1]['ua']) +
         model[1]['ba']
     )
 
     short_mem = torch.tanh(
-        torch.matmul(input, model[1]['vs']) +
+        torch.matmul(torch.relu(torch.matmul(input, model[1]['vs1'])), model[1]['vs2']) +
         attention * context_t[1] +
         model[1]['bs']
     )
 
     state = remember * short_mem + (1-remember) * context_t[1]
 
-    produced_outputs.append(state.squeeze(dim=1))
+    produced_outputs.append(state.squeeze(dim=0))
 
     if dropout != 0.0:
         drop = random.choices(range(len(state)), k=int(len(state) * dropout))
@@ -247,40 +259,39 @@ def prop_timestep(model, sequence_t, context_t, filters, dropout):
         str_ = '_'+str(_)
 
         input2 = sequence_t[_]
+        input2 = torch.zeros([1, len(input2)], requires_grad=False) + input2
         state2 = context_t[-1][_-1]
 
         remember = torch.sigmoid(
             input1 * model[-1]['vr'] +
             torch.matmul(input2, model[-1]['vr2'+str_]) +
-            torch.matmul(model[-1]['ur'], state1) +
-            torch.matmul(model[-1]['ur2'+str_], state2)
+            torch.matmul(state1, model[-1]['ur']) +
+            torch.matmul(state2, model[-1]['ur2'+str_])
         )
 
         forget = torch.sigmoid(
             input1 * model[-1]['vf'] +
             torch.matmul(input2, model[-1]['vf2'+str_]) +
-            torch.matmul(model[-1]['uf'], state1) +
-            torch.matmul(model[-1]['uf2'+str_], state2)
+            torch.matmul(state1, model[-1]['uf']) +
+            torch.matmul(state2, model[-1]['uf2'+str_])
         )
 
         attention = torch.tanh(
             input1 * model[-1]['vr'] +
             torch.matmul(input2, model[-1]['vr2'+str_]) +
-            torch.matmul(model[-1]['ur'], state1) +
-            torch.matmul(model[-1]['ur2'+str_], state2)
+            torch.matmul(state1, model[-1]['ur']) +
+            torch.matmul(state2, model[-1]['ur2'+str_])
         )
 
         short_mem = torch.tanh(
             input1 * model[-1]['vs'] +
             torch.matmul(input2, model[-1]['vs2'+str_]) +
-            torch.matmul(model[-1]['us'], state1) +
-            torch.matmul(model[-1]['us2'+str_], state2)
+            torch.matmul(state1, model[-1]['us']) +
+            torch.matmul(state2, model[-1]['us2'+str_])
         )
 
         layer_produced_context.append(remember * short_mem + forget * context_t[-1][_-1])
-
-        produced_outputs.append((attention * torch.tanh(layer_produced_context[-1])).squeeze(dim=1))
-
+        produced_outputs.append((attention * torch.tanh(layer_produced_context[-1])).squeeze(dim=0))
     produced_context.append(layer_produced_context)
 
 
@@ -296,7 +307,7 @@ def vector_convolve(vector, filter_values, filter_weights):
     convolution = []
 
     for _ in range(vector_size):
-        conv_vect = [vector[(_+i) % vector_size] for i in filter_values]
+        conv_vect = [vector[:,(_+i) % vector_size] for i in filter_values]
         to_convolve.append(torch.cat(conv_vect))
 
     for element in to_convolve:
@@ -389,8 +400,8 @@ def update_model_adam(model, accugrads, moments, epoch_nr, batch_size=1, lr=0.00
 
 
 def init_states(model):
-    states_t0 = [torch.randn([vector_size,1], requires_grad=True) for _ in range(len(model)-2)]
-    states_t0.append([torch.randn([vector_size,1], requires_grad=True) for _ in range(hm_vectors-1)])
+    states_t0 = [torch.randn([1,vector_size], requires_grad=True) for _ in range(len(model)-2)]
+    states_t0.append([torch.randn([1,vector_size], requires_grad=True) for _ in range(hm_vectors-1)])
 
     return [states_t0]
 
