@@ -17,9 +17,13 @@ learning_rate_2 = 0.01
 
     # model details
 
-filters = ((3,4),
-           (6,7,8),
-           (9,10,11))
+filters = [
+    Vanilla.default_filters,
+    ((3,4),(6,7,8),(9,10,11)),
+    ((4,7),(3,7),(7,8,9),(4,7))
+           ]
+
+filters = (*filters[0], *filters[-1])
 
 
     # data details
