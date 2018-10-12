@@ -32,16 +32,19 @@ def create_model(filters=default_filters):
             'vr1':torch.randn([in_size,in_size/2], requires_grad=True),
             'vr2':torch.randn([in_size/2,vector_size], requires_grad=True),
             'ur':torch.randn([vector_size,vector_size], requires_grad=True),
-            'br':torch.zeros([1,vector_size], requires_grad=True),
+            'br1':torch.zeros([1,in_size/2], requires_grad=True),
+            'br2':torch.zeros([1,vector_size], requires_grad=True),
 
             'va1':torch.randn([in_size,in_size/2], requires_grad=True),
             'va2':torch.randn([in_size/2,vector_size], requires_grad=True),
             'ua':torch.randn([vector_size,vector_size], requires_grad=True),
-            'ba':torch.zeros([1,vector_size], requires_grad=True),
+            'ba1':torch.zeros([1,in_size/2], requires_grad=True),
+            'ba2':torch.zeros([1,vector_size], requires_grad=True),
 
             'vs1':torch.randn([in_size,in_size/2], requires_grad=True),
             'vs2':torch.randn([in_size/2,vector_size], requires_grad=True),
-            'bs':torch.zeros([1,vector_size], requires_grad=True),
+            'bs1':torch.zeros([1,in_size/2], requires_grad=True),
+            'bs2':torch.zeros([1,vector_size], requires_grad=True),
         }
     )
 
@@ -54,16 +57,19 @@ def create_model(filters=default_filters):
             'vr1':torch.randn([in_size,in_size/2], requires_grad=True),
             'vr2':torch.randn([in_size/2,vector_size], requires_grad=True),
             'ur':torch.randn([vector_size,vector_size], requires_grad=True),
-            'br':torch.zeros([1,vector_size], requires_grad=True),
+            'br1':torch.zeros([1,in_size/2], requires_grad=True),
+            'br2':torch.zeros([1,vector_size], requires_grad=True),
 
             'va1':torch.randn([in_size,in_size/2], requires_grad=True),
             'va2':torch.randn([in_size/2,vector_size], requires_grad=True),
             'ua':torch.randn([vector_size,vector_size], requires_grad=True),
-            'ba':torch.zeros([1,vector_size], requires_grad=True),
+            'ba1':torch.zeros([1,in_size/2], requires_grad=True),
+            'ba2':torch.zeros([1,vector_size], requires_grad=True),
 
             'vs1':torch.randn([in_size,in_size/2], requires_grad=True),
             'vs2':torch.randn([in_size/2,vector_size], requires_grad=True),
-            'bs':torch.zeros([1,vector_size], requires_grad=True),
+            'bs1':torch.zeros([1,in_size/2], requires_grad=True),
+            'bs2':torch.zeros([1,vector_size], requires_grad=True),
         }
     )
 
@@ -179,21 +185,21 @@ def prop_timestep(model, sequence_t, context_t, filters, dropout):
     input = torch.zeros([1, len(input)], requires_grad=False) + input
 
     remember = torch.sigmoid(
-        torch.matmul(torch.relu(torch.matmul(input, model[0]['vr1'])), model[0]['vr2']) +
+        torch.matmul(torch.relu(torch.matmul(input, model[0]['vr1']) + model[0]['br1']), model[0]['vr2']) +
         torch.matmul(context_t[0], model[0]['ur']) +
-        model[0]['br']
+        model[0]['br2']
     )
 
     attention = torch.tanh(
-        torch.matmul(torch.relu(torch.matmul(input, model[0]['va1'])), model[0]['va2']) +
+        torch.matmul(torch.relu(torch.matmul(input, model[0]['va1']) + model[0]['ba1']), model[0]['va2']) +
         torch.matmul(context_t[0], model[0]['ua']) +
-        model[0]['ba']
+        model[0]['ba2']
     )
 
     short_mem = torch.tanh(
-        torch.matmul(torch.relu(torch.matmul(input, model[0]['vr1'])), model[0]['vs2']) +
+        torch.matmul(torch.relu(torch.matmul(input, model[0]['vs1']) + model[0]['bs1']), model[0]['vs2']) +
         attention * context_t[0] +
-        model[0]['bs']
+        model[0]['bs2']
     )
 
     state = remember * short_mem + (1-remember) * context_t[0]
@@ -220,21 +226,21 @@ def prop_timestep(model, sequence_t, context_t, filters, dropout):
     input = torch.zeros([1, len(input)], requires_grad=False) + input
 
     remember = torch.sigmoid(
-        torch.matmul(torch.relu(torch.matmul(input, model[1]['vr1'])), model[1]['vr2']) +
+        torch.matmul(torch.relu(torch.matmul(input, model[1]['vr1']) + model[1]['br1']), model[1]['vr2']) +
         torch.matmul(context_t[1], model[1]['ur']) +
-        model[1]['br']
+        model[1]['br2']
     )
 
     attention = torch.tanh(
-        torch.matmul(torch.relu(torch.matmul(input, model[1]['va1'])), model[1]['va2']) +
+        torch.matmul(torch.relu(torch.matmul(input, model[1]['va1']) + model[1]['ba1']), model[1]['va2']) +
         torch.matmul(context_t[1], model[1]['ua']) +
-        model[1]['ba']
+        model[1]['ba2']
     )
 
     short_mem = torch.tanh(
-        torch.matmul(torch.relu(torch.matmul(input, model[1]['vs1'])), model[1]['vs2']) +
+        torch.matmul(torch.relu(torch.matmul(input, model[1]['vs1']) + model[1]['bs1']), model[1]['vs2']) +
         attention * context_t[1] +
-        model[1]['bs']
+        model[1]['bs2']
     )
 
     state = remember * short_mem + (1-remember) * context_t[1]
