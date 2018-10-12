@@ -17,11 +17,11 @@ learning_rate_2 = 0.01
 
     # model details
 
-filters = [
+filters = (
     Vanilla.default_filters,
     ((3,4),(6,7,8),(9,10,11)),
     ((4,7),(3,7),(7,8,9),(4,7))
-           ]
+)
 
 filters = (*filters[0], *filters[-1])
 
@@ -29,7 +29,7 @@ filters = (*filters[0], *filters[-1])
     # data details
 
 data_path = "samples_*.pkl"
-data_size = 500 # todo: re-adjust dis ,
+data_size = 1_000 # todo: re-adjust dis ,
 batch_size = 400 # /2
 
 
@@ -55,7 +55,7 @@ branch_ctr_max = 5
 
 loss_initial = \
     [[999_999_999,999_999_999,999_999_999,999_999_999]]
-
+trainer.filters = filters
 
 
 def simple_parenting(model, accugrads, data):
