@@ -7,10 +7,12 @@ import time
 import torch
 import numpy as np
 
+import gc
+
 
     # parent details
 
-total_epochs = 20
+total_epochs = 50
 learning_rate_1 = 0.001
 learning_rate_2 = 0.01
 
@@ -29,7 +31,7 @@ filters = (*filters[0], *filters[-1])
     # data details
 
 data_path = "samples_*.pkl"
-data_size = 20_000 # todo: re-adjust dis ,
+data_size = 25_000 # todo: re-adjust dis ,
 batch_size = 400 # /2
 
 
@@ -42,11 +44,11 @@ further_parenting = False
 trainer.dropout = 0.0
 
 reducing_batch_sizes = True
-reduce_batch_per_epoch = 5
-reduce_ratio = 3/5
+reduce_batch_per_epoch = 10
+reduce_ratio = 4/5
 
 save_intermediate_model = True
-save_model_per_epoch = 5
+save_model_per_epoch = 10
 
 branch_ctr_max = 5
 
@@ -75,8 +77,6 @@ def simple_parenting(model, accugrads, data):
 
 
         # begin parenting
-
-    print(f'Batch size : {batch_size}')
 
     print(f'\n@ {get_clock()} : Simple Parent running...')
 
@@ -330,13 +330,17 @@ def run_advanced_parenting(data):
 
 
 def parent_bootstrap():
-    resources.initialize_loss_txt() ; torch.set_default_tensor_type('torch.FloatTensor')
-
+    
+    print(f'Data size  : {data_size}')
+    print(f'Batch size : {batch_size}')
+    print(f'Epochs     : {total_epochs}')
+    
+    torch.set_default_tensor_type('torch.FloatTensor')
+    resources.initialize_loss_txt()
+    trainer.batch_size = batch_size
     data = get_data()
 
-    trainer.batch_size = batch_size
-
-    if not start_advanced:  # start simple
+    if not start_advanced:     # start simple
 
         run_simple_parenting(data)
 
@@ -344,7 +348,7 @@ def parent_bootstrap():
 
             run_advanced_parenting(data)
 
-    else:  # OR start advanced
+    else:                      # OR start advanced
 
         run_advanced_parenting(data)
 

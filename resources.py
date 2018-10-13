@@ -101,15 +101,6 @@ def write_loss(epoch_losses, as_txt=False, epoch_nr=None):
             with open('loss_'+str(_+1)+'.txt','a+') as f:
                 f.write(str(epoch_nr)+','+str(loss)+'\n')
 
-def write_loss_training(epoch_losses, as_txt=False, epoch_nr=None):
-    if not as_txt:
-        for i, loss in enumerate(epoch_losses):
-            print('{{"metric": "Loss {}", "value": {}}}'.format(i+1, float(loss)))
-    else:
-        for _, loss in enumerate(epoch_losses):
-            with open('tr_loss_'+str(_+1)+'.txt','a+') as f:
-                f.write(str(epoch_nr)+','+str(loss)+'\n')
-
 def initialize_loss_txt():
     for _ in range(4):
         open('loss_' + str(_ + 1) + '.txt', "w+").close()
@@ -169,10 +160,11 @@ def load_data(data_path, limit_size):
 
 def get_datasize(data_path):
     files = glob.glob(data_path)
-    dataset = []
+    total_size = 0
     for file in files:
-        dataset.extend(pickle_load(file))
-    return len(dataset[0][0])
+        data = pickle_load(file)
+        total_size += len(data[0][0])
+    return total_size
 
 def batchify(resource, batch_size):
     data_size = len(resource)

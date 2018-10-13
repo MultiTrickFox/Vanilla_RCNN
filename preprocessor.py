@@ -4,6 +4,8 @@ import glob
 from music21 import converter
 from multiprocessing import Pool, cpu_count
 
+import gc
+
 
 min_seq_len = 5
 max_seq_len = 25
@@ -13,7 +15,7 @@ MAX_DURATION = 8
 SPLIT_DURATION = 2  # of 16th notes
 MAX_VOLUME = 127
 
-batch_div = 10 # 10 / 15 / 20
+batch_div = 15 # 10 / 15 / 20
 show_passed_exceptions = False
 
 
@@ -234,7 +236,8 @@ def preproc_bootstrap():
         files = raw_files[ptr1:ptr2]
         data, len_data = preprocess(raw_files=files)
         resources.pickle_save(data, 'samples_' + str(batch_id) + '.pkl')
-        data_size += len_data ; data = None
+        data_size += len_data
+        data = None ; gc.collect()
 
         print(f'Batch {batch_id} of {hm_batches} completed. : {len_data} samples')
     print(f'Total of {data_size} samples obtained.')

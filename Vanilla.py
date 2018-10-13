@@ -331,7 +331,7 @@ def loss_wrt_distance(output_seq, label_seq):
             loss = (lbl_e - pred_e).pow(2)
             # loss = lbl_e - pred_e
 
-            sequence_losses[_].append(loss.sum())
+            if _ == 0: sequence_losses[_].append(loss.sum())
 
     return sequence_losses
 
