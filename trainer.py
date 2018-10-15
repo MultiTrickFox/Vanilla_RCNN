@@ -46,7 +46,7 @@ adam_alpha_accugrad = 0.999
 
 dropout = 0.0
 
-loss_nultip = (1, 0.001, 0.001, 0.001)
+loss_multipliers = (1, 0.001, 0.001, 0.001)
 
     # # #
 
@@ -120,7 +120,7 @@ def process_fn(fn_input):
 
     loss = [float(sum(element)) for element in sequence_losses]
 
-    Vanilla.update_gradients(sequence_losses, loss_multipliers=loss_nultip)
+    Vanilla.update_gradients(sequence_losses, loss_multipliers=loss_multipliers)
 
     grads = Vanilla.return_grads(model)
 

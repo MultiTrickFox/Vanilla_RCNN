@@ -240,6 +240,7 @@ def plot_loss_txts(hm_mins_refresh=2):
 
 
 if __name__ == '__main__':
+    print(get_datasize("samples_*.pkl"))
     plot_loss_txts()
 
 

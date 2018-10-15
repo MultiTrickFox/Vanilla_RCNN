@@ -12,7 +12,7 @@ default_filters = ((1,2,3,4),
                    (5,6,7,8,9),
                    (9,10,11))
 
-default_loss_multipliers = (1, 0.02, 0.002, 0.002)
+default_loss_multipliers = (1, 0.2, 0.2, 0.2)
 
 
 #   Structure
@@ -331,6 +331,7 @@ def loss_wrt_distance(output_seq, label_seq):
             loss = (lbl_e - pred_e).pow(2)
             # loss = lbl_e - pred_e
 
+            # sequence_losses[_].append(loss.sum())
             if _ == 0: sequence_losses[_].append(loss.sum())
 
     return sequence_losses

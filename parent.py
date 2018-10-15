@@ -31,8 +31,8 @@ filters = (*filters[0], *filters[-1])
     # data details
 
 data_path = "samples_*.pkl"
-data_size = 25_000 # todo: re-adjust dis ,
-batch_size = 400 # /2
+data_size = 45_000 # todo: re-adjust dis ,
+batch_size = 200
 
 
     # training details
@@ -41,7 +41,7 @@ start_advanced = False
 
 further_parenting = False
 
-trainer.dropout = 0.0
+dropout = 0.1
 
 reducing_batch_sizes = True
 reduce_batch_per_epoch = 10
@@ -52,12 +52,19 @@ save_model_per_epoch = 10
 
 branch_ctr_max = 5
 
+loss_multipliers = (1, 0.001, 0.001, 0.001)
+
 
     # global declarations
 
 loss_initial = \
     [[999_999_999,999_999_999,999_999_999,999_999_999]]
+
 trainer.filters = filters
+trainer.dropout = dropout
+trainer.batch_size = batch_size
+trainer.loss_multipliers = loss_multipliers
+
 
 
 def simple_parenting(model, accugrads, data):
@@ -337,7 +344,7 @@ def parent_bootstrap():
     
     torch.set_default_tensor_type('torch.FloatTensor')
     resources.initialize_loss_txt()
-    trainer.batch_size = batch_size
+
     data = get_data()
 
     if not start_advanced:     # start simple
