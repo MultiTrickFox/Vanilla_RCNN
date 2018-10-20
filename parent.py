@@ -12,7 +12,7 @@ import gc
 
     # parent details
 
-total_epochs = 50
+total_epochs = 40
 learning_rate_1 = 0.001
 learning_rate_2 = 0.01
 
@@ -45,7 +45,7 @@ dropout = 0.1
 
 reducing_batch_sizes = True
 reduce_batch_per_epoch = 10
-reduce_ratio = 4/5
+reduce_ratio = 9/10
 
 save_intermediate_model = True
 save_model_per_epoch = 10
@@ -111,7 +111,7 @@ def simple_parenting(model, accugrads, data):
                 ctr_save_id +=1 ; save_id = ctr_save_id * 0.001
                 resources.save_model(prevStep[0], save_id)
                 trainer.save_accugrads(prevStep[1], save_id)
-                print(f'Data saved : {ctr_save_id}')
+                print(f'Data saved : Part {ctr_save_id}')
 
             prevStep = thisStep
 
@@ -140,9 +140,7 @@ def simple_parenting(model, accugrads, data):
 
                     if all(np.array(this_loss[0]) <= np.array(branch_goal[0])):
 
-                        prevStep = branch_prevStep
-
-                        checkpoints.append(prevStep)
+                        checkpoints.append(branch_prevStep)
 
                         successful_epochs +=1
 
@@ -157,6 +155,9 @@ def simple_parenting(model, accugrads, data):
                             ctr_save_id +=1 ; save_id = ctr_save_id * 0.001
                             resources.save_model(branch_prevStep[0], save_id)
                             trainer.save_accugrads(branch_prevStep[1], save_id)
+                            print(f'Data saved : Part {ctr_save_id}')
+
+                        prevStep = branch_thisStep
 
                         break
 
@@ -214,6 +215,7 @@ def advanced_parenting(model, accugrads, moments, data):
                 resources.save_model(prevStep[0], save_id)
                 trainer.save_accugrads(prevStep[1], save_id)
                 trainer.save_moments(prevStep[2], save_id)
+                print(f'Data saved : Part {ctr_save_id}')
 
             prevStep = thisStep
 
@@ -242,9 +244,7 @@ def advanced_parenting(model, accugrads, moments, data):
 
                     if all(np.array(this_loss[0]) < np.array(branch_goal[0])):
 
-                        prevStep = branch_prevStep
-
-                        checkpoints.append(prevStep)
+                        checkpoints.append(branch_prevStep)
 
                         successful_epochs +=1
 
@@ -260,6 +260,9 @@ def advanced_parenting(model, accugrads, moments, data):
                             resources.save_model(branch_prevStep[0], save_id)
                             trainer.save_accugrads(branch_prevStep[1], save_id)
                             trainer.save_moments(branch_prevStep[2], save_id)
+                            print(f'Data saved : Part {ctr_save_id}')
+
+                        prevStep = branch_thisStep
 
                         break
 
