@@ -12,27 +12,25 @@ import gc
 
     # parent details
 
-total_epochs = 40
+total_epochs = 50
 learning_rate_1 = 0.001
 learning_rate_2 = 0.01
 
 
     # model details
 
-filters = (
-    Vanilla.default_filters,
-    ((3,4),(6,7,8),(9,10,11)),
-    ((4,7),(3,7),(7,8,9),(4,7))
-)
+filters =                   \
+    Vanilla.default_filters + \
+    () + \
+    ((4,7),(3,7),(7,8,9),(4,7))   \
 
-filters = (*filters[0], *filters[-1])
-
+# (3,4),(6,7,8),(9,10,11)
 
     # data details
 
 data_path = "samples_*.pkl"
 data_size = 45_000 # todo: re-adjust dis ,
-batch_size = 200
+batch_size = 100
 
 
     # training details
@@ -43,7 +41,7 @@ further_parenting = False
 
 dropout = 0.1
 
-reducing_batch_sizes = True
+reducing_batch_sizes = False
 reduce_batch_per_epoch = 10
 reduce_ratio = 9/10
 
@@ -344,6 +342,7 @@ def parent_bootstrap():
     print(f'Data size  : {data_size}')
     print(f'Batch size : {batch_size}')
     print(f'Epochs     : {total_epochs}')
+    print('')
     
     torch.set_default_tensor_type('torch.FloatTensor')
     resources.initialize_loss_txt()

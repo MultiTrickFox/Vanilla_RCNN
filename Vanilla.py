@@ -8,11 +8,13 @@ vector_size = 13
 max_prop_time = 20
 
 
-default_filters = ((1,2,3,4),
-                   (5,6,7,8,9),
-                   (9,10,11))
+default_filters = (
+    (1, 2, 3, 4),
+    (5, 6, 7, 8, 9),
+    (9, 10, 11)
+                   )
 
-default_loss_multipliers = (1, 0.2, 0.2, 0.2)
+default_loss_multipliers = (1, 0.001, 0.001, 0.001)
 
 
 #   Structure
@@ -76,7 +78,6 @@ def create_model(filters=default_filters):
     # layer : convolution
 
     layer = {}
-
     for _,filter in enumerate(filters):
         layer['wf'+str(_)] = torch.randn([len(filter),1], requires_grad=True)
 
@@ -330,9 +331,10 @@ def loss_wrt_distance(output_seq, label_seq):
 
             loss = (lbl_e - pred_e).pow(2)
             # loss = lbl_e - pred_e
+            # loss = lbl_e * -(torch.log(pred_e)) if lbl_e != 0 else 0
 
-            sequence_losses[_].append(loss.sum())
-            # if _ == 0: sequence_losses[_].append(loss.sum())
+            # sequence_losses[_].append(loss.sum())
+            if _ == 0: sequence_losses[_].append(loss.sum())
 
     return sequence_losses
 
