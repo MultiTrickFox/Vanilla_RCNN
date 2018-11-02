@@ -12,7 +12,7 @@ import gc
 
     # parent details
 
-total_epochs = 50
+total_epochs = 20
 learning_rate_1 = 0.001
 learning_rate_2 = 0.01
 
@@ -29,8 +29,8 @@ filters =                   \
     # data details
 
 data_path = "samples_*.pkl"
-data_size = 45_000 # todo: re-adjust dis ,
-batch_size = 100
+data_size = 15_000 # todo: re-adjust dis ,
+batch_size = 400
 
 
     # training details
@@ -50,7 +50,7 @@ save_model_per_epoch = 10
 
 branch_ctr_max = 5
 
-loss_multipliers = (1, 0.001, 0.001, 0.001)
+loss_multipliers = (1, 0.002, 0.002, 0.002)
 
 
     # global declarations
@@ -278,7 +278,7 @@ def advanced_parenting(model, accugrads, moments, data):
 
 def get_data(): return resources.load_data(data_path, data_size)
 
-def get_clock(): return time.asctime(time.localtime(time.time())).split(' ')[3]
+def get_clock(): return time.asctime(time.localtime(time.time())).split(' ')[4]
 
 
 
@@ -338,12 +338,12 @@ def run_advanced_parenting(data):
 
 
 def parent_bootstrap():
-    
+
     print(f'Data size  : {data_size}')
     print(f'Batch size : {batch_size}')
     print(f'Epochs     : {total_epochs}')
     print('')
-    
+
     torch.set_default_tensor_type('torch.FloatTensor')
     resources.initialize_loss_txt()
 

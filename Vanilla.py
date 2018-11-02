@@ -16,7 +16,7 @@ default_filters = (
     (9, 10, 11)
                    )
 
-default_loss_multipliers = (1, 0.001, 0.001, 0.001)
+default_loss_multipliers = (1, 0.05, 0.05, 0.05)
 
 
 #   Structure
@@ -323,7 +323,7 @@ def prop_timestep(model, sequence_t, context_t, filters, dropout):
         # decision _finalize
 
     input = decision_outputs[-1]
-    input2 = produced_outputs[0]
+    input2 = torch.tensor(produced_outputs[0], requires_grad=False)
     state = context_t[-1]
     layer = model[-1]
 
@@ -400,6 +400,7 @@ def loss_wrt_distance(output_seq, label_seq):
             # loss = lbl_e * -(torch.log(pred_e)) if lbl_e != 0 else 0
 
             sequence_losses[_].append(loss.sum())
+            # if _ == 0 : sequence_losses[_].append(loss.sum())
 
     return sequence_losses
 
@@ -409,10 +410,11 @@ def loss_wrt_distance(output_seq, label_seq):
 
 def update_gradients(sequence_loss, loss_multipliers=default_loss_multipliers):
     for _,node in enumerate(sequence_loss):
-        multiplier = loss_multipliers[_]
+        multiplier = [loss_multipliers[_]]
         for time_step in node:
-            time_step *= multiplier
-            time_step.backward(retain_graph=True)
+           time_step.backward(retain_graph=True,
+                              gradient=torch.Tensor(multiplier)
+                              )
 
 
 def update_model(model, batch_size=1, learning_rate=0.001):
