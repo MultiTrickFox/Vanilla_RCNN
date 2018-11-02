@@ -14,6 +14,7 @@ from Vanilla                          \
     import update_model_rmsprop        \
     as optimize_model
 
+num_workers = torch.multiprocessing.cpu_count()
 loss_fn = Vanilla.loss_wrt_distance
 
 
@@ -30,7 +31,8 @@ filters = Vanilla.default_filters
 epochs = 20
 learning_rate = 0.001
 
-batch_size = 400 ; data_size = 15_000
+# batch_size = 400 ; data_size = 15_000
+batch_size = 100 ; data_size = batch_size * 5
 data_path = "samples*.pkl"
 
 train_basic = True
@@ -48,14 +50,11 @@ dropout = 0.0
 
 loss_multipliers = (1, 0.001, 0.001, 0.001)
 
+
     # # #
 
 
 def train_rms(model, accu_grads, data, num_epochs=1):
-
-    num_samples = len(data)
-    num_batches = int(num_samples / batch_size)
-    num_workers = torch.multiprocessing.cpu_count()
 
     losses = []
 
@@ -65,15 +64,9 @@ def train_rms(model, accu_grads, data, num_epochs=1):
 
         random.shuffle(data)
 
-        for batch in range(num_batches):
-
-            # create batch
+        for batch in resources.batchify(data, batch_size):
 
             batch_loss = np.zeros_like(epoch_loss)
-
-            batch_ptr = batch * batch_size
-            batch_end_ptr = (batch+1) * batch_size
-            batch = data[batch_ptr:batch_end_ptr]
 
             with Pool(num_workers) as pool:
 
@@ -108,13 +101,16 @@ def process_fn(fn_input):
 
     model, data = fn_input
     x_vocab, x_oct, x_dur, x_vol, y_vocab, y_oct, y_dur, y_vol = data
-    generative_length = len(y_vocab)
 
-    inp = [x_vocab, x_oct, x_dur, x_vol]
+    in_time_length = len(x_vocab)
+    out_time_length = len(y_vocab)
+
+    inp = [[Tensor(e) for e in [x_vocab[_], x_oct[_], x_dur[_], x_vol[_]]]
+           for _ in range(in_time_length)]
     trg = [[Tensor(e) for e in [y_vocab[_], y_oct[_], y_dur[_], y_vol[_]]]
-           for _ in range(generative_length)]
+           for _ in range(out_time_length)]
 
-    response = Vanilla.forward_prop(model, inp, gen_iterations=generative_length, filters=filters, dropout=dropout)
+    response = Vanilla.forward_prop(model, inp, gen_iterations=out_time_length, filters=filters, dropout=dropout)
 
     sequence_losses = loss_fn(response, trg)
 
@@ -185,27 +181,17 @@ def load_moments(model, model_id=None):
 
 def train_adam(model, accu_grads, moments, data, epoch_nr=None, num_epochs=1):
 
-    num_samples = len(data)
-    num_batches = int(num_samples / batch_size)
-    num_workers = torch.multiprocessing.cpu_count()
-
     losses = []
 
     for epoch in range(num_epochs):
 
-        epoch_loss = np.zeros(Vanilla.vector_size)
+        epoch_loss = np.zeros(Vanilla.hm_vectors)
 
         random.shuffle(data)
 
-        for batch in range(num_batches):
-
-            # create batch
+        for batch in resources.batchify(data, batch_size):
 
             batch_loss = np.zeros_like(epoch_loss)
-
-            batch_ptr = batch * batch_size
-            batch_end_ptr = (batch+1) * batch_size
-            batch = np.array(data[batch_ptr:batch_end_ptr])
 
             with Pool(num_workers) as pool:
 
@@ -223,7 +209,7 @@ def train_adam(model, accu_grads, moments, data, epoch_nr=None, num_epochs=1):
                     loss, grads = result
 
                     Vanilla.apply_grads(model,grads)
-                    batch_loss -= loss
+                    batch_loss += loss
 
                 # handle
 
@@ -275,7 +261,7 @@ if __name__ == '__main__':
 
         # ADAM advanced training
 
-        model = res.load_model()
+        model = resources.load_model()
         if model is None: model = Vanilla.create_model(filters)
 
         accu_grads = load_accugrads(model)
