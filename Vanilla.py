@@ -8,7 +8,7 @@ vector_size = 13
 max_prop_time = 20
 
 
-default_layers = (20,10,15)
+default_layers = (25, 15, 20)
 
 default_filters = (
     (1, 2, 3, 4),
@@ -26,7 +26,6 @@ def create_model(filters=default_filters,layers=default_layers):
 
     model = []
     hm_filters = len(filters)
-    layers = layers + tuple([vector_size*(hm_vectors-1)])
 
     # layer : presence_near
 
@@ -87,35 +86,55 @@ def create_model(filters=default_filters,layers=default_layers):
         if _ == 0:
             in_size = vector_size*(hm_vectors-1)
             out_size = layer_size
+        elif _ == len(layers)-1:
+            in_size = layers[_-1]
+            out_size = vector_size*(hm_vectors-1)
         else:
             in_size = layers[_-1]
             out_size = layer_size
 
         layer = {
-            'vr':torch.randn([in_size,out_size], requires_grad=True),
+            'vr':torch.randn([in_size,layer_size], requires_grad=True),
             'ur':torch.randn([layer_size,layer_size], requires_grad=True),
             'br':torch.zeros([1,out_size], requires_grad=True),
 
-            'vf':torch.randn([in_size,out_size], requires_grad=True),
+            'vf':torch.randn([in_size,layer_size], requires_grad=True),
             'uf':torch.randn([layer_size,layer_size], requires_grad=True),
             'bf':torch.zeros([1,out_size], requires_grad=True),
 
-            'va':torch.randn([in_size,out_size], requires_grad=True),
+            'va':torch.randn([in_size,layer_size], requires_grad=True),
             'ua':torch.randn([layer_size,layer_size], requires_grad=True),
             'ba':torch.zeros([1,out_size], requires_grad=True),
 
-            'vs':torch.randn([in_size,out_size], requires_grad=True),
+            'vs':torch.randn([in_size,layer_size], requires_grad=True),
             'us':torch.randn([layer_size,layer_size], requires_grad=True),
             'bs':torch.zeros([1,out_size], requires_grad=True),
         }
 
         if _ == len(layers)-1:
 
-            layer['vr2'] = torch.randn([vector_size,layer_size], requires_grad=True)
-            layer['vf2'] = torch.randn([vector_size,layer_size], requires_grad=True)
-            layer['va2'] = torch.randn([vector_size,layer_size], requires_grad=True)
-            layer['vs2'] = torch.randn([vector_size,layer_size], requires_grad=True)
+            layer['vr2'] = torch.randn([vector_size, layer_size], requires_grad=True)
+            layer['vf2'] = torch.randn([vector_size, layer_size], requires_grad=True)
+            layer['va2'] = torch.randn([vector_size, layer_size], requires_grad=True)
+            layer['vs2'] = torch.randn([vector_size, layer_size], requires_grad=True)
 
+            layer['vr_f']  = torch.randn([layer_size, out_size], requires_grad=True)
+            layer['ur_f']  = torch.randn([layer_size, out_size], requires_grad=True)
+            layer['vr2_f'] = torch.randn([layer_size, out_size], requires_grad=True)
+
+            layer['vf_f']  = torch.randn([layer_size, out_size], requires_grad=True)
+            layer['uf_f']  = torch.randn([layer_size, out_size], requires_grad=True)
+            layer['vf2_f'] = torch.randn([layer_size, out_size], requires_grad=True)
+
+            layer['va_f']  = torch.randn([layer_size, out_size], requires_grad=True)
+            layer['ua_f']  = torch.randn([layer_size, out_size], requires_grad=True)
+            layer['va2_f'] = torch.randn([layer_size, out_size], requires_grad=True)
+
+            layer['vs_f']  = torch.randn([layer_size, out_size], requires_grad=True)
+            layer['us_f']  = torch.randn([layer_size, out_size], requires_grad=True)
+            layer['vs2_f'] = torch.randn([layer_size, out_size], requires_grad=True)
+
+            layer['cnv'] = torch.randn([out_size, layer_size], requires_grad=True)
 
         model.append(layer)
 
@@ -317,51 +336,55 @@ def prop_timestep(model, sequence_t, context_t, filters, dropout):
 
         state = remember * short_mem + forget * state
         produced_context.append(state)
-        output = (attention * torch.tanh(produced_context[-1])).squeeze(dim=0)
+        output = (attention * torch.tanh(produced_context[-1]))
         decision_outputs.append(output)
 
         # decision _finalize
 
     input = decision_outputs[-1]
-    input2 = torch.tensor(produced_outputs[0], requires_grad=False)
+    input2 = torch.tensor(
+        produced_outputs[0].
+            unsqueeze(0),
+        requires_grad=False)
+
     state = context_t[-1]
     layer = model[-1]
 
     remember = torch.sigmoid(
-        torch.matmul(input, layer['vr']) +
-        torch.matmul(input2, layer['vr2']) +
-        torch.matmul(state, layer['ur']) +
+        torch.matmul(torch.relu(torch.matmul(input, layer['vr'])), layer['vr_f']) +
+        torch.matmul(torch.relu(torch.matmul(input2, layer['vr2'])), layer['vr2_f']) +
+        torch.matmul(torch.relu(torch.matmul(state, layer['ur'])), layer['ur_f']) +
         layer['br']
     )
 
     forget = torch.sigmoid(
-        torch.matmul(input, layer['vf']) +
-        torch.matmul(input2, layer['vf2']) +
-        torch.matmul(state, layer['uf']) +
+        torch.matmul(torch.relu(torch.matmul(input, layer['vf'])), layer['vf_f']) +
+        torch.matmul(torch.relu(torch.matmul(input2, layer['vf2'])), layer['vf2_f']) +
+        torch.matmul(torch.relu(torch.matmul(state, layer['uf'])), layer['uf_f']) +
         layer['bf']
     )
 
     attention = torch.tanh(
-        torch.matmul(input, layer['va']) +
-        torch.matmul(input2, layer['va2']) +
-        torch.matmul(state, layer['ua']) +
+        torch.matmul(torch.relu(torch.matmul(input, layer['va'])), layer['va_f']) +
+        torch.matmul(torch.relu(torch.matmul(input2, layer['va2'])), layer['va2_f']) +
+        torch.matmul(torch.relu(torch.matmul(state, layer['ua'])), layer['ua_f']) +
         layer['ba']
     )
 
     short_mem = torch.tanh(
-        torch.matmul(input, layer['vs']) +
-        torch.matmul(input2, layer['vs2']) +
-        torch.matmul(state, layer['us']) +
+        torch.matmul(torch.relu(torch.matmul(input, layer['vs'])), layer['vs_f']) +
+        torch.matmul(torch.relu(torch.matmul(input2, layer['vs2'])), layer['vs2_f']) +
+        torch.matmul(torch.relu(torch.matmul(state, layer['us'])), layer['us_f']) +
         layer['bs']
     )
 
-    state = remember * short_mem + forget * state
-    produced_context.append(state)
-    output = (attention * torch.tanh(produced_context[-1])).squeeze(dim=0)
-    produced_outputs.append(output[:vector_size])
-    produced_outputs.append(output[vector_size:vector_size*2])
-    produced_outputs.append(output[-vector_size:])
+    state = torch.matmul((remember * short_mem), layer['cnv']) + (torch.matmul(forget, layer['cnv']) * state)
+    output = (attention * torch.matmul(torch.tanh(state), layer['cnv'].transpose(0,1))).squeeze(dim=0)
 
+    produced_context.append(state)
+    produced_outputs.extend([output[:vector_size],
+                             output[vector_size:vector_size*2],
+                             output[-vector_size:]])
 
     return produced_outputs, produced_context
 
@@ -399,8 +422,8 @@ def loss_wrt_distance(output_seq, label_seq):
             # loss = lbl_e - pred_e
             # loss = lbl_e * -(torch.log(pred_e)) if lbl_e != 0 else 0
 
-            sequence_losses[_].append(loss.sum())
-            # if _ == 0 : sequence_losses[_].append(loss.sum())
+            # sequence_losses[_].append(loss.sum())     # todo :L after fix
+            if _ != 0 : sequence_losses[_].append(loss.sum())
 
     return sequence_losses
 
