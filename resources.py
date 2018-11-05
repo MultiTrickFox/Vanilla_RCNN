@@ -92,7 +92,7 @@ def pickle_load(file_path):
 
 
 
-def write_loss(epoch_losses, as_txt=False, epoch_nr=None):
+def write_loss(epoch_losses, as_txt=True, epoch_nr=None):
     if not as_txt:
         for i, loss in enumerate(epoch_losses):
             print('{{"metric": "Loss {}", "value": {}}}'.format(i+1, float(loss)))

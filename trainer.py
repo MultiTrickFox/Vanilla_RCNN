@@ -31,8 +31,8 @@ filters = Vanilla.default_filters
 epochs = 20
 learning_rate = 0.001
 
-# batch_size = 400 ; data_size = 15_000
-batch_size = 100 ; data_size = batch_size * 20
+batch_size = 400 ; data_size = 15_000
+# batch_size = 100 ; data_size = batch_size * 20
 # batch_size = 1 ; data_size = batch_size * 1
 data_path = "samples*.pkl"
 
@@ -49,7 +49,7 @@ adam_alpha_accugrad = 0.999
 
 dropout = 0.0
 
-loss_multipliers = (1, 0.001, 0.001, 0.001)
+loss_multipliers = Vanilla.default_loss_multipliers
 
 
     # # #
@@ -94,7 +94,7 @@ def train_rms(model, accu_grads, data, num_epochs=1):
             optimize_model(model, accu_grads, batch_size=batch_size, lr=learning_rate, alpha=rms_alpha)
 
         losses.append(epoch_loss)
-        print(f'epoch {epoch} loss {epoch_loss}')   # ; resources.write_loss_training(epoch_loss, True, epoch)
+        print(f'epoch {epoch} loss {epoch_loss}') ; resources.write_loss(epoch_loss,epoch_nr=epoch)
     return model, accu_grads, losses
 
 
