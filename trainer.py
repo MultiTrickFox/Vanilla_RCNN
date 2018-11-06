@@ -32,8 +32,8 @@ epochs = 20
 learning_rate = 0.001
 
 # batch_size = 400 ; data_size = 15_000
-# batch_size = 100 ; data_size = batch_size * 10
-batch_size = 1 ; data_size = batch_size * 1
+batch_size = 200 ; data_size = batch_size * 20
+# batch_size = 1 ; data_size = batch_size * 1
 data_path = "samples*.pkl"
 
 train_basic = True

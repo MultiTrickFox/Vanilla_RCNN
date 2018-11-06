@@ -8,7 +8,7 @@ vector_size = 13
 max_prop_time = 20
 
 
-default_layers = (8, 5, 10)
+default_layers = (8, 50, 10)
 
 default_filters = (
     (1, 2, 3, 4),
