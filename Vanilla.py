@@ -8,12 +8,19 @@ vector_size = 13
 max_prop_time = 20
 
 
-default_layers = (8, 50, 10)
+default_layers = (20, 16)
 
 default_filters = (
-    (1, 2, 3, 4),
-    (5, 6, 7, 8, 9),
-    (9, 10, 11)
+
+    (3, 4),         # 3rd range
+    (6, 7, 8),      # 5th range
+    (9, 10, 11),    # 6-7th range
+    (6, 7, 1, 2),   # 7-2th range
+
+    (4, 7),         # major chord
+    (3, 7),         # minor chord
+    (9, 4)          # alt-minor chord
+
                    )
 
 default_loss_multipliers = (1, 1, 1, 1)
@@ -31,21 +38,21 @@ def create_model(filters=default_filters,layers=default_layers):
 
     model.append(
         {
-            'vr': torch.randn([1, hm_vectors], requires_grad=True),
-            'ur': torch.randn([vector_size, vector_size], requires_grad=True),
-            'br': torch.zeros([1, vector_size], requires_grad=True),
+            'vr': torch.randn([1,hm_vectors], requires_grad=True),
+            'ur': torch.randn([vector_size,vector_size], requires_grad=True),
+            'br': torch.zeros([1,vector_size], requires_grad=True),
 
-            'vf': torch.randn([1, hm_vectors], requires_grad=True),
-            'uf': torch.randn([vector_size, vector_size], requires_grad=True),
-            'bf': torch.zeros([1, vector_size], requires_grad=True),
+            'vf': torch.randn([1,hm_vectors], requires_grad=True),
+            'uf': torch.randn([vector_size,vector_size], requires_grad=True),
+            'bf': torch.zeros([1,vector_size], requires_grad=True),
 
-            'va': torch.randn([1, hm_vectors], requires_grad=True),
-            'ua': torch.randn([vector_size, vector_size], requires_grad=True),
-            'ba': torch.zeros([1, vector_size], requires_grad=True),
+            'va': torch.randn([1,hm_vectors], requires_grad=True),
+            'ua': torch.randn([vector_size,vector_size], requires_grad=True),
+            'ba': torch.zeros([1,vector_size], requires_grad=True),
 
-            'vs': torch.randn([1, hm_vectors], requires_grad=True),
-            'us': torch.randn([vector_size, vector_size], requires_grad=True),
-            'bs': torch.zeros([1, vector_size], requires_grad=True),
+            'vs': torch.randn([1,hm_vectors], requires_grad=True),
+            'us': torch.randn([vector_size,vector_size], requires_grad=True),
+            'bs': torch.zeros([1,vector_size], requires_grad=True),
         }
     )
 
@@ -53,32 +60,33 @@ def create_model(filters=default_filters,layers=default_layers):
 
     layer = {}
     for _,filter in enumerate(filters):
-        layer['wf'+str(_)] = torch.randn([len(filter), 1], requires_grad=True)
+        layer['wf'+str(_)] = torch.randn([len(filter),1], requires_grad=True)
 
     model.append(layer)
 
     # layer : presence_far
 
     in_size = vector_size*hm_filters
+    mid_size = int(in_size*3/4)
 
     model.append(
         {
-            'vr': torch.randn([1, hm_filters], requires_grad=True),
-            'vr2': torch.randn([in_size, vector_size*2], requires_grad=True),
-            'vr2.2': torch.randn([vector_size*2, vector_size], requires_grad=True),
-            'ur': torch.randn([vector_size, vector_size], requires_grad=True),
-            'br': torch.zeros([1, vector_size], requires_grad=True),
+            'vr': torch.randn([1,hm_filters], requires_grad=True),
+            'vr2': torch.randn([in_size,mid_size], requires_grad=True),
+            'vr2.2': torch.randn([mid_size,vector_size], requires_grad=True),
+            'ur': torch.randn([vector_size,vector_size], requires_grad=True),
+            'br': torch.zeros([1,vector_size], requires_grad=True),
 
             'va': torch.randn([1, hm_filters], requires_grad=True),
-            'va2': torch.randn([in_size, vector_size*2], requires_grad=True),
-            'va2.2': torch.randn([vector_size*2, vector_size], requires_grad=True),
-            'ua': torch.randn([vector_size, vector_size], requires_grad=True),
-            'ba': torch.zeros([1, vector_size], requires_grad=True),
+            'va2': torch.randn([in_size,mid_size], requires_grad=True),
+            'va2.2': torch.randn([mid_size,vector_size], requires_grad=True),
+            'ua': torch.randn([vector_size,vector_size], requires_grad=True),
+            'ba': torch.zeros([1,vector_size], requires_grad=True),
 
-            'vs': torch.randn([1, hm_filters], requires_grad=True),
-            'vs2': torch.randn([in_size, vector_size*2], requires_grad=True),
-            'vs2.2': torch.randn([vector_size*2, vector_size], requires_grad=True),
-            'bs': torch.zeros([1, vector_size], requires_grad=True),
+            'vs': torch.randn([1,hm_filters], requires_grad=True),
+            'vs2': torch.randn([in_size,mid_size], requires_grad=True),
+            'vs2.2': torch.randn([mid_size,vector_size], requires_grad=True),
+            'bs': torch.zeros([1,vector_size], requires_grad=True),
         }
     )
 
@@ -101,81 +109,73 @@ def create_model(filters=default_filters,layers=default_layers):
         else:
             in_size = layers[_-1]
             out_size = layer_size
-            
-        if _ == 0 or _ == hm_layers-1:
 
-            layer['br'] = torch.zeros([1, out_size], requires_grad=True)
-            layer['bf'] = torch.zeros([1, out_size], requires_grad=True)
-            layer['ba'] = torch.zeros([1, out_size], requires_grad=True)
-            layer['bs'] = torch.zeros([1, out_size], requires_grad=True)
-            
+        if _ == 0:
+
             for __ in range(1,hm_vectors):
-    
                 str_ = '_'+str(__)
 
-                if _ == 0:
+                layer['vr'+str_] = torch.randn([in_size,layer_size], requires_grad=True)
+                layer['ur'+str_] = torch.randn([layer_size,layer_size], requires_grad=True)
 
-                    layer['vr'+str_] = torch.randn([in_size, layer_size], requires_grad=True)
-                    layer['ur'+str_] = torch.randn([layer_size, layer_size], requires_grad=True)
+                layer['vf'+str_] = torch.randn([in_size,layer_size], requires_grad=True)
+                layer['uf'+str_] = torch.randn([layer_size,layer_size], requires_grad=True)
 
-                    layer['vf'+str_] = torch.randn([in_size, layer_size], requires_grad=True)
-                    layer['uf'+str_] = torch.randn([layer_size, layer_size], requires_grad=True)
+                layer['va'+str_] = torch.randn([in_size,layer_size], requires_grad=True)
+                layer['ua'+str_] = torch.randn([layer_size,layer_size], requires_grad=True)
 
-                    layer['va'+str_] = torch.randn([in_size, layer_size], requires_grad=True)
-                    layer['ua'+str_] = torch.randn([layer_size, layer_size], requires_grad=True)
+                layer['vs'+str_] = torch.randn([in_size,layer_size], requires_grad=True)
+                layer['us'+str_] = torch.randn([layer_size,layer_size], requires_grad=True)
 
-                    layer['vs'+str_] = torch.randn([in_size, layer_size], requires_grad=True)
-                    layer['us'+str_] = torch.randn([layer_size, layer_size], requires_grad=True)
+        elif _ == hm_layers-1:
 
-                else:
+            for __ in range(1,hm_vectors):
+                str_ = '_'+str(__)
 
-                    layer['vr'+str_] = torch.randn([in_size, layer_size], requires_grad=True)
-                    layer['ur'+str_] = torch.randn([out_size, layer_size], requires_grad=True)
+                layer['vr'+str_] = torch.randn([in_size,layer_size], requires_grad=True)
+                layer['vr'+str_+'.2'] = torch.randn([layer_size,out_size], requires_grad=True)
+                layer['ur'+str_] = torch.randn([out_size,layer_size], requires_grad=True)
+                layer['ur'+str_+'.2'] = torch.randn([layer_size,out_size], requires_grad=True)
 
-                    layer['vf'+str_] = torch.randn([in_size, layer_size], requires_grad=True)
-                    layer['uf'+str_] = torch.randn([out_size, layer_size], requires_grad=True)
+                layer['vf'+str_] = torch.randn([in_size,layer_size], requires_grad=True)
+                layer['vf'+str_+'.2'] = torch.randn([layer_size,out_size], requires_grad=True)
+                layer['uf'+str_] = torch.randn([out_size,layer_size], requires_grad=True)
+                layer['uf'+str_+'.2'] = torch.randn([layer_size,out_size], requires_grad=True)
 
-                    layer['va'+str_] = torch.randn([in_size, layer_size], requires_grad=True)
-                    layer['ua'+str_] = torch.randn([out_size, layer_size], requires_grad=True)
+                layer['va'+str_] = torch.randn([in_size,layer_size], requires_grad=True)
+                layer['va'+str_+'.2'] = torch.randn([layer_size,out_size], requires_grad=True)
+                layer['ua'+str_] = torch.randn([out_size,layer_size], requires_grad=True)
+                layer['ua'+str_+'.2'] = torch.randn([layer_size,out_size], requires_grad=True)
 
-                    layer['vs'+str_] = torch.randn([in_size, layer_size], requires_grad=True)
-                    layer['us'+str_] = torch.randn([out_size, layer_size], requires_grad=True)
+                layer['vs'+str_] = torch.randn([in_size,layer_size], requires_grad=True)
+                layer['vs'+str_+'.2'] = torch.randn([layer_size,out_size], requires_grad=True)
+                layer['us'+str_] = torch.randn([out_size,layer_size], requires_grad=True)
+                layer['us'+str_+'.2'] = torch.randn([layer_size,out_size], requires_grad=True)
 
-            if _ == hm_layers-1:
-
-                for __ in range(1,hm_vectors):
-
-                    str_ = '_'+str(__)
-
-                    layer['vr'+str_+'.2'] = torch.randn([layer_size, out_size], requires_grad=True)
-                    layer['vf'+str_+'.2'] = torch.randn([layer_size, out_size], requires_grad=True)
-                    layer['va'+str_+'.2'] = torch.randn([layer_size, out_size], requires_grad=True)
-                    layer['vs'+str_+'.2'] = torch.randn([layer_size, out_size], requires_grad=True)
-
-                    layer['ur'+str_+'.2'] = torch.randn([layer_size, out_size], requires_grad=True)
-                    layer['uf'+str_+'.2'] = torch.randn([layer_size, out_size], requires_grad=True)
-                    layer['ua'+str_+'.2'] = torch.randn([layer_size, out_size], requires_grad=True)
-                    layer['us'+str_+'.2'] = torch.randn([layer_size, out_size], requires_grad=True)
-                
         else:
 
             for __ in range(1,hm_vectors):
-
                 str_ = '_'+str(__)
 
-                layer['vr'+str_] = torch.randn([in_size, layer_size], requires_grad=True)
-                layer['vr2'+str_] = torch.randn([vector_size, layer_size], requires_grad=True)
-                layer['ur'+str_] = torch.randn([layer_size, layer_size], requires_grad=True)
-                layer['br'] = torch.zeros([1, out_size], requires_grad=True)
+                layer['vr'+str_] = torch.randn([in_size,layer_size], requires_grad=True)
+                layer['vr2'+str_] = torch.randn([vector_size,layer_size], requires_grad=True)
+                layer['ur'+str_] = torch.randn([layer_size,layer_size], requires_grad=True)
+                layer['br'] = torch.zeros([1,out_size], requires_grad=True)
 
-                layer['va'+str_] = torch.randn([in_size, layer_size], requires_grad=True)
-                layer['va2'+str_] = torch.randn([vector_size, layer_size], requires_grad=True)
-                layer['ua'+str_] = torch.randn([layer_size, layer_size], requires_grad=True)
-                layer['ba'] = torch.zeros([1, out_size], requires_grad=True)
+                layer['va'+str_] = torch.randn([in_size,layer_size], requires_grad=True)
+                layer['va2'+str_] = torch.randn([vector_size,layer_size], requires_grad=True)
+                layer['ua'+str_] = torch.randn([layer_size,layer_size], requires_grad=True)
+                layer['ba'] = torch.zeros([1,out_size], requires_grad=True)
 
-                layer['vs'+str_] = torch.randn([in_size, layer_size], requires_grad=True)
-                layer['vs2'+str_] = torch.randn([vector_size, layer_size], requires_grad=True)
-                layer['bs'] = torch.zeros([1, out_size], requires_grad=True)
+                layer['vs'+str_] = torch.randn([in_size,layer_size], requires_grad=True)
+                layer['vs2'+str_] = torch.randn([vector_size,layer_size], requires_grad=True)
+                layer['bs'] = torch.zeros([1,out_size], requires_grad=True)
+
+
+        layer['br'] = torch.zeros([1,out_size], requires_grad=True)
+        layer['bf'] = torch.zeros([1,out_size], requires_grad=True)
+        layer['ba'] = torch.zeros([1,out_size], requires_grad=True)
+        layer['bs'] = torch.zeros([1,out_size], requires_grad=True)
 
 
         model.append(layer)
