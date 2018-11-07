@@ -77,7 +77,7 @@ def create_model(filters=default_filters,layers=default_layers):
             'ur': torch.randn([vector_size,vector_size], requires_grad=True),
             'br': torch.zeros([1,vector_size], requires_grad=True),
 
-            'va': torch.randn([1, hm_filters], requires_grad=True),
+            'va': torch.randn([1,hm_filters], requires_grad=True),
             'va2': torch.randn([in_size,mid_size], requires_grad=True),
             'va2.2': torch.randn([mid_size,vector_size], requires_grad=True),
             'ua': torch.randn([vector_size,vector_size], requires_grad=True),
@@ -340,10 +340,10 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout):
         layer = model[_+3]
         states = context_t[_+2]
 
-        if _ == 0:
+        decision_outputs.append([])
+        produced_context.append([])
 
-            decision_outputs.append([])
-            produced_context.append([])
+        if _ == 0:
 
             for __ in range(1,hm_vectors):
 
@@ -382,9 +382,6 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout):
                 decision_outputs[-1].append(output)
 
         elif _ == hm_layers-1:
-
-            decision_outputs.append([])
-            produced_context.append([])
 
             for __ in range(1,hm_vectors):
 
@@ -429,8 +426,6 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout):
             # input = decision_outputs[-1]
             input2 = produced_outputs[0].unsqueeze(0)
             # torch.tensor(produced_outputs[0].unsqueeze(0),requires_grad=False)
-            decision_outputs.append([])
-            produced_context.append([])
 
             for __ in range(1,hm_vectors):
 
@@ -441,21 +436,21 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout):
 
                 remember = torch.sigmoid(
                     torch.matmul(input, layer['vr'+str_]) +
-                    # torch.matmul(input2, layer['vr2']) +
+                    torch.matmul(input2, layer['vr2']) +
                     torch.matmul(state, layer['ur'+str_]) +
                     layer['br']
                 )
 
                 attention = torch.sigmoid(
                     torch.matmul(input, layer['va'+str_]) +
-                    # torch.matmul(input2, layer['va2']) +
+                    torch.matmul(input2, layer['va2']) +
                     torch.matmul(state, layer['ua'+str_]) +
                     layer['ba']
                 )
 
                 short_mem = torch.tanh(
                     torch.matmul(input, layer['vs'+str_]) +
-                    # torch.matmul(input2, layer['vs2']) +
+                    torch.matmul(input2, layer['vs2']) +
                     attention * state +
                     layer['bs']
                 )
@@ -501,8 +496,8 @@ def loss_wrt_distance(output_seq, label_seq):
             loss = (lbl_e - pred_e).pow(2)
             # loss = lbl_e * -(torch.log(pred_e)) if lbl_e != 0 else 0
 
-            # sequence_losses[_].append(loss.sum())     # todo :L after fix
-            if _ != 0 : sequence_losses[_].append(loss.sum())
+            sequence_losses[_].append(loss.sum())     # todo :L after fix
+            # if _ != 0 : sequence_losses[_].append(loss.sum())
 
     return sequence_losses
 
