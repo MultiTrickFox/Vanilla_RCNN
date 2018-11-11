@@ -28,11 +28,11 @@ filters = Vanilla.default_filters
     # basic params
 
 
-epochs = 50
-learning_rate = 0.0005
+epochs = 30
+learning_rate = 0.002
 
-# batch_size = 400 ; data_size = 15_000
-batch_size = 400 ; data_size = batch_size * 5
+# batch_size = 400 ; data_size = 10_000
+batch_size = 400 ; data_size = batch_size * 4
 # batch_size = 1 ; data_size = batch_size * 1
 data_path = "samples*.pkl"
 
@@ -111,7 +111,7 @@ def process_fn(fn_input):
     trg = [[Tensor(e) for e in [y_vocab[_], y_oct[_], y_dur[_], y_vol[_]]]
            for _ in range(out_time_length)]
 
-    response = Vanilla.forward_prop(model, inp, gen_iterations=out_time_length, filters=filters, dropout=dropout)
+    response = Vanilla.forward_prop(model, inp, actual_output=trg, gen_iterations=out_time_length, filters=filters, dropout=dropout)
 
     sequence_losses = loss_fn(response, trg)
 

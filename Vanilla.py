@@ -8,7 +8,7 @@ vector_size = 13
 max_prop_time = 20
 
 
-default_layers = (24, 18)
+default_layers = (6, 8, 10)
 
 default_filters = (
 
@@ -188,7 +188,7 @@ def create_model(filters=default_filters,layers=default_layers):
 # Forward Prop
 
 
-def forward_prop(model, sequence, context=None, gen_seed=None, gen_iterations=None, filters=default_filters, dropout=0.0):
+def forward_prop(model, sequence, actual_output=None, context=None, gen_seed=None, gen_iterations=None, filters=default_filters, dropout=0.0):
 
 
     #   listen
@@ -199,7 +199,10 @@ def forward_prop(model, sequence, context=None, gen_seed=None, gen_iterations=No
 
     for t in range(len(sequence[0])):
 
-        output, state = forward_prop_t(model, sequence[t], states[-1], filters=filters, dropout=dropout)
+        if actual_output is not None:
+            output, state = forward_prop_t(model, sequence[t], states[-1], filters=filters, dropout=dropout, output_t=actual_output[t])
+        else:
+            output, state = forward_prop_t(model, sequence[t], states[-1], filters=filters, dropout=dropout)
 
         outputs.append(output)
         states.append(state)
@@ -236,7 +239,7 @@ def forward_prop(model, sequence, context=None, gen_seed=None, gen_iterations=No
     return outputs
 
 
-def forward_prop_t(model, sequence_t, context_t, filters, dropout):
+def forward_prop_t(model, sequence_t, context_t, filters, dropout, output_t=None):
 
     produced_outputs = []
     produced_context = []
@@ -427,9 +430,9 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout):
         else:
 
             # input = decision_outputs[-1]
+            input2 = output_t[0] if output_t is not None else produced_outputs[0].unsqueeze(0)
             # input2 = produced_outputs[0].unsqueeze(0)
-            # input2 = sequence_t[0].unsqueeze(0)
-            input2 = torch.tensor(produced_outputs[0].unsqueeze(0), requires_grad=False)
+            # input2 = torch.tensor(produced_outputs[0].unsqueeze(0), requires_grad=False)
 
             for __ in range(1,hm_vectors):
 
