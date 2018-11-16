@@ -19,9 +19,9 @@ loss_fn = Vanilla.loss_wrt_distance
 
 
 
-    # filter struct
+    # model struct
 
-
+layers = Vanilla.default_layers
 filters = Vanilla.default_filters
 
 
@@ -32,7 +32,7 @@ epochs = 30
 learning_rate = 0.002
 
 # batch_size = 400 ; data_size = 10_000
-batch_size = 400 ; data_size = batch_size * 4
+batch_size = 400 ; data_size = batch_size * 3
 # batch_size = 1 ; data_size = batch_size * 1
 data_path = "samples*.pkl"
 
@@ -245,7 +245,7 @@ if __name__ == '__main__':
         # RMS basic training
 
         model = resources.load_model()
-        if model is None: model = Vanilla.create_model(filters)
+        if model is None: model = Vanilla.create_model(filters, layers)
 
         accu_grads = load_accugrads(model)
 
@@ -263,7 +263,7 @@ if __name__ == '__main__':
         # ADAM advanced training
 
         model = resources.load_model()
-        if model is None: model = Vanilla.create_model(filters)
+        if model is None: model = Vanilla.create_model(filters, layers)
 
         accu_grads = load_accugrads(model)
         moments = load_moments(model)

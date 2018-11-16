@@ -19,17 +19,18 @@ learning_rate_2 = 0.01
 
     # model details
 
-filters =                   \
-    Vanilla.default_filters + \
-    () + \
-    ((4,7),(3,7),(7,8,9),(4,7))   \
+filters =                                   \
+    Vanilla.default_filters +                 \
+    () #+                                         \
+    #((4, 7), (3, 7), (7, 8, 9), (4, 7), (9, 4))   \
 
-# (3,4),(6,7,8),(9,10,11)
+layers = (20, 12, 16)
+
 
     # data details
 
 data_path = "samples_*.pkl"
-data_size = 15_000 # todo: re-adjust dis ,
+data_size = 2_000 # 15_000 # todo: re-adjust dis ,
 batch_size = 400
 
 
@@ -58,6 +59,7 @@ loss_multipliers = (1, 0.002, 0.002, 0.002)
 loss_initial = \
     [[999_999_999,999_999_999,999_999_999,999_999_999]]
 
+trainer.layers = layers
 trainer.filters = filters
 trainer.dropout = dropout
 trainer.batch_size = batch_size
@@ -278,7 +280,7 @@ def advanced_parenting(model, accugrads, moments, data):
 
 def get_data(): return resources.load_data(data_path, data_size)
 
-def get_clock(): return time.asctime(time.localtime(time.time())).split(' ')[4]
+def get_clock(): return time.asctime(time.localtime(time.time())).split(' ')[3]
 
 
 
