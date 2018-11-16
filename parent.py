@@ -24,13 +24,13 @@ filters =                                   \
     () #+                                         \
     #((4, 7), (3, 7), (7, 8, 9), (4, 7), (9, 4))   \
 
-layers = (20, 12, 16)
+layers = (8, 5, 13)
 
 
     # data details
 
 data_path = "samples_*.pkl"
-data_size = 2_000 # 15_000 # todo: re-adjust dis ,
+data_size = 5_000 # 15_000 # todo: re-adjust dis ,
 batch_size = 400
 
 
@@ -51,7 +51,7 @@ save_model_per_epoch = 10
 
 branch_ctr_max = 5
 
-loss_multipliers = (1, 0.002, 0.002, 0.002)
+loss_multipliers = (1, 1, 1, 1)
 
 
     # global declarations
