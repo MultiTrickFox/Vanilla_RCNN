@@ -19,18 +19,18 @@ learning_rate_2 = 0.01
 
     # model details
 
-filters =                                   \
-    Vanilla.default_filters +                 \
-    () #+                                         \
-    #((4, 7), (3, 7), (7, 8, 9), (4, 7), (9, 4))   \
+filters =                    \
+    Vanilla.default_filters +  \
+    () #+                       \
+    # ((4, 7), (3, 7), (9, 4))   \
 
-layers = (8, 5, 13)
+layers = (10, 8, 12)
 
 
     # data details
 
 data_path = "samples_*.pkl"
-data_size = 5_000 # 15_000 # todo: re-adjust dis ,
+data_size = 35_000
 batch_size = 400
 
 
@@ -142,7 +142,7 @@ def simple_parenting(model, accugrads, data):
 
                         checkpoints.append(branch_prevStep)
 
-                        successful_epochs +=1
+                        successful_epochs +=(branch_ctr+1)
 
                         print(f'@ {get_clock()} : '
                               f'.  epoch {successful_epochs} / {total_epochs} completed. ')
@@ -246,7 +246,7 @@ def advanced_parenting(model, accugrads, moments, data):
 
                         checkpoints.append(branch_prevStep)
 
-                        successful_epochs +=1
+                        successful_epochs +=(branch_ctr+1)
 
                         print(f'@ {get_clock()} : '
                               f'.  epoch {successful_epochs} / {total_epochs} completed. ')

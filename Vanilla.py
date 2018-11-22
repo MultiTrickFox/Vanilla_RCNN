@@ -8,14 +8,14 @@ vector_size = 13
 max_prop_time = 20
 
 
-default_layers = (8, 5, 13)
+default_layers = (8, 5, 10)
 
 default_filters = (
 
     (3, 4),         # 3rd range
     (6, 7, 8),      # 5th range
-    # (9, 10, 11),    # 6-7th range
-    # (6, 7, 1, 2),   # 7-2th range
+    (9, 10, 11),    # 6-7th range
+    (6, 7, 1, 2),   # 7-2th range
 
     # (4, 7),         # major chord   @todo: remove this part if too much loss.
     # (3, 7),         # minor chord
@@ -39,7 +39,7 @@ def create_model(filters=default_filters,layers=default_layers):
     model.append(
         {
             'vr': torch.randn([1,hm_vectors], requires_grad=True),
-            'ur': torch.randn([1,vector_size], requires_grad=True),
+            'ur': torch.randn([vector_size,vector_size], requires_grad=True),
             'br': torch.zeros([1,vector_size], requires_grad=True),
 
             'vf': torch.randn([1,hm_vectors], requires_grad=True),
@@ -51,7 +51,7 @@ def create_model(filters=default_filters,layers=default_layers):
             'ba': torch.zeros([1,vector_size], requires_grad=True),
 
             'vs': torch.randn([1,hm_vectors], requires_grad=True),
-            'us': torch.randn([vector_size,vector_size], requires_grad=True),
+            'us': torch.randn([1,vector_size], requires_grad=True),
             'bs': torch.zeros([1,vector_size], requires_grad=True),
         }
     )
@@ -266,15 +266,15 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, output_t=None
 
     remember = torch.sigmoid(
         torch.matmul(layer['vr'], input) +
-        torch.mul(state, layer['ur']) +
+        torch.matmul(state, layer['ur']) +
         layer['br']
     )
 
-    forget = torch.sigmoid(
-        torch.matmul(layer['vf'], input) +
-        torch.mul(state, layer['uf']) +
-        layer['bf']
-    )
+    # forget = torch.sigmoid(
+    #    torch.matmul(layer['vf'], input) +
+    #     torch.mul(state, layer['uf']) +
+    #     layer['bf']
+    # )
 
     attention = torch.tanh(
         torch.matmul(layer['va'], input) +
@@ -284,12 +284,14 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, output_t=None
 
     short_mem = torch.tanh(
         torch.matmul(layer['vs'], input) +
-        torch.matmul(state, layer['us']) +
+        # torch.matmul(state, layer['us']) +
+        attention * state +
         layer['bs']
     )
 
-    state = remember * short_mem + forget * state
-    state_focused = (attention * torch.tanh(state))
+    # state = remember * short_mem + forget * state
+    state = remember * short_mem + (1 - remember) * state
+    # state_focused = (attention * torch.tanh(state))
 
     # layer_produced_context.append()
     # produced_outputs.append((attention * torch.tanh(layer_produced_context[-1])).squeeze(dim=0))
@@ -303,7 +305,7 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, output_t=None
     # layer : convolution
 
     layer = model[1]
-    input = state_focused
+    input = produced_context[0]
 
     convolutions = [vector_convolve(input, filter_values=filter, filter_weights=layer['wf'+str(_)])
                     for _, filter in enumerate(filters)]
@@ -312,11 +314,11 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, output_t=None
 
     layer = model[2]
     state = context_t[1]
-    input = torch.stack(convolutions, 0)
+    # input = torch.stack(convolutions, 0)
     input2 = torch.cat(convolutions).unsqueeze(0)
 
     remember = torch.sigmoid(
-        torch.matmul(layer['vr'], input) +
+        # torch.matmul(layer['vr'], input) +
         torch.mul(state, layer['ur']) +
         # torch.matmul(torch.tanh(torch.matmul(input2, layer['vr2'])), layer['vr2.2']) +
         torch.matmul(input2, layer['vr2']) +
@@ -324,7 +326,7 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, output_t=None
     )
 
     attention = torch.tanh(
-        torch.matmul(layer['va'], input) +
+        # torch.matmul(layer['va'], input) +
         torch.mul(state, layer['ua']) +
         # torch.matmul(torch.tanh(torch.matmul(input2, layer['va2'])), layer['va2.2']) +
         torch.matmul(input2, layer['va2']) +
@@ -332,7 +334,7 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, output_t=None
     )
 
     short_mem = torch.tanh(
-        torch.matmul(layer['vs'], input) +
+        # torch.matmul(layer['vs'], input) +
         attention * state +
         # torch.matmul(torch.tanh(torch.matmul(input2, layer['vs2'])), layer['vs2.2']) +
         torch.matmul(input2, layer['vs2']) +
@@ -462,8 +464,9 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, output_t=None
                 produced_context[-1].append(state)
                 output = (attention * torch.tanh(state))
                 decision_outputs[-1].append(output)
+                out = torch.sigmoid(torch.matmul(output, layer['wo'+str_]) + layer['bo'+str_])
+                produced_outputs.append(out.squeeze(0))
 
-                produced_outputs.append(output.squeeze(0))
 
         # middle layers - gru
         else:

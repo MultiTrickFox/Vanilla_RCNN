@@ -94,7 +94,7 @@ def train_rms(model, accu_grads, data, num_epochs=1):
             optimize_model(model, accu_grads, batch_size=batch_size, lr=learning_rate, alpha=rms_alpha)
 
         losses.append(epoch_loss)
-        print(f'epoch {epoch} loss {epoch_loss}') ; resources.write_loss(epoch_loss,epoch_nr=epoch)
+        print(f'epoch {epoch} loss {epoch_loss}')
     return model, accu_grads, losses
 
 
