@@ -12,7 +12,7 @@ import gc
 
     # parent details
 
-total_epochs = 20
+total_epochs = 40
 learning_rate_1 = 0.001
 learning_rate_2 = 0.01
 
@@ -30,8 +30,8 @@ layers = (10, 8, 12)
     # data details
 
 data_path = "samples_*.pkl"
-data_size = 35_000
-batch_size = 400
+data_size = 30_000
+batch_size = 200
 
 
     # training details
@@ -44,7 +44,7 @@ dropout = 0.1
 
 reducing_batch_sizes = False
 reduce_batch_per_epoch = 10
-reduce_ratio = 9/10
+reduce_ratio = 95/100
 
 save_intermediate_model = True
 save_model_per_epoch = 10
@@ -142,7 +142,7 @@ def simple_parenting(model, accugrads, data):
 
                         checkpoints.append(branch_prevStep)
 
-                        successful_epochs +=(branch_ctr+1)
+                        successful_epochs +=(branch_ctr+2)
 
                         print(f'@ {get_clock()} : '
                               f'.  epoch {successful_epochs} / {total_epochs} completed. ')
@@ -246,7 +246,7 @@ def advanced_parenting(model, accugrads, moments, data):
 
                         checkpoints.append(branch_prevStep)
 
-                        successful_epochs +=(branch_ctr+1)
+                        successful_epochs +=(branch_ctr+2)
 
                         print(f'@ {get_clock()} : '
                               f'.  epoch {successful_epochs} / {total_epochs} completed. ')

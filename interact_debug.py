@@ -1,0 +1,163 @@
+import Vanilla
+import resources
+import preproc
+
+
+max_octave = preproc.MAX_OCTAVE
+max_duration = preproc.MAX_DURATION
+max_volume = preproc.MAX_VOLUME
+
+vocab_pick_thr = 0.3
+
+
+
+def bootstrap(data=None):
+
+
+    model = resources.load_model()
+    while model is None:
+        model_id = input('Import model and Hit Enter.. ')
+        model = resources.load_model() if model_id == '' else resources.load_model(model_id)
+
+
+    chord_mode = input("hit 's' to Quit Chord Mode: ")
+    chord_mode = False if chord_mode == 's' else True
+
+    conv = lambda output: ai_2_human(output, chord_mode=chord_mode)
+
+    if data is None:
+
+        while True:
+
+            input_sequence = get_user_input(int(input('Enter an Input Length: ')))
+
+            responses = Vanilla.forward_prop(model, input_sequence)
+
+            converted_response = [conv(out_t) for out_t in responses]
+
+            for response in converted_response:
+
+                print('---')
+                print(' Notes:', [resources.note_reverse_dict[_] for _ in response[0]])
+                print(' Octaves:', response[1])
+                print(' Durations:', response[2])
+                print(' Velocities:', response[3])
+                print('---')
+
+            print(f'Response length: {len(converted_response)}')
+
+            input()
+
+        else:
+            print("hit here")
+            response = Vanilla.forwprop(model, input_sequence)
+
+            converted_response = [conv(out_t) for out_t in response]
+
+            converted_response[0] = [resources.note_reverse_dict[_] for _ in converted_response[0]]
+            
+            return converted_response
+    
+
+
+
+# converters
+
+import torch
+
+
+def ai_2_human(out_t, chord_mode=True, pick_thr=vocab_pick_thr):
+
+    vocabs, octaves, durations, volumes = out_t
+
+    # sel_vocabs = []
+    sel_octs   = []
+    sel_durs   = []
+    sel_vols   = []
+
+    if chord_mode:
+        sel_vocabs = [_ for _,e in enumerate(vocabs) if e.item() >= pick_thr]
+    else:
+        sel_vocabs = [torch.argmax(vocabs).item()]
+
+    for vocab in sel_vocabs:
+        sel_octs.append(round(float(octaves[vocab]) * max_octave))
+        sel_durs.append(round(float(durations[vocab]) * max_duration))
+        sel_vols.append(round(float(volumes[vocab]) * max_volume))
+
+    return sel_vocabs, sel_octs, sel_durs, sel_vols
+
+
+def human_2_ai(data):
+
+    notes, octaves, durations, volumes = data
+    inp_len = len(notes)
+
+    c_notes = [resources.note_dict[notes[i].upper()] for i in range(inp_len)]
+
+    vocab_vect = preproc.empty_vect.copy()
+    oct_vect   = preproc.empty_vect.copy()
+    dur_vect   = preproc.empty_vect.copy()
+    vol_vect   = preproc.empty_vect.copy()
+
+    for i, note in enumerate(c_notes):
+        duplicate_note = False if vocab_vect[note] == 0 else True
+        vocab_vect[note] += 1
+        oct_vect[note]   += float(octaves[i])
+        dur_vect[note]   += float(durations[i])
+        vol_vect[note]   += float(volumes[i])
+        if duplicate_note:
+            oct_vect[note]   /= 2
+            dur_vect[note]   /= 2
+            vol_vect[note]   /= 2
+
+    # normalization & fixes
+
+    vocab_sum = sum(vocab_vect)
+
+    if vocab_sum != 1: vocab_vect = [e/vocab_sum for e in vocab_vect]
+    oct_vect = [e/max_octave for e in oct_vect]
+    dur_vect = [e/max_duration for e in dur_vect]
+    vol_vect = [e/max_volume for e in vol_vect]
+
+    return vocab_vect, oct_vect, dur_vect, vol_vect
+
+
+# other helpers
+
+
+def get_user_input(inp_len):
+    vocab_seq = []
+    oct_seq   = []
+    dur_seq   = []
+    vol_seq   = []
+
+    for i in range(inp_len):
+        notes = str(input('Enter a tone / chord : ')).split(' ')
+        octs = str(input('Enter octaves : ')).split(' ')
+        durs = str(input('Enter durations : ')).split(' ')
+        vols = str(input('Enter volumes : ')).split(' ')
+
+        data = [notes, octs, durs, vols]
+        vocab_vect, oct_vect, dur_vect, vol_vect = human_2_ai(data)
+
+        vocab_seq.append(vocab_vect)
+        oct_seq.append(oct_vect)
+        dur_seq.append(dur_vect)
+        vol_seq.append(vol_vect)
+
+    sequence = []
+
+    for _ in range(len(vocab_seq)):
+        sequence.append([vocab_seq[_], oct_seq[_], dur_seq[_], vol_seq[_]])
+
+
+    return sequence
+
+
+
+
+
+if __name__ == '__main__':
+    bootstrap()
+
