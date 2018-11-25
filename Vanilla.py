@@ -202,7 +202,7 @@ def create_model(filters=default_filters,layers=default_layers):
 # Forward Prop
 
 
-def forward_prop(model, sequence, actual_output=None, context=None, gen_seed=None, gen_iterations=None, filters=default_filters, dropout=0.0):
+def forward_prop(model, sequence, response=None, context=None, gen_seed=None, gen_iterations=None, filters=default_filters, dropout=0.0):
 
 
     #   listen
@@ -211,11 +211,9 @@ def forward_prop(model, sequence, actual_output=None, context=None, gen_seed=Non
     states = [context] if context is not None else init_states(model)
     outputs = []
 
-    if actual_output is None: actual_output = [None] * len(sequence)
-
     for t in range(len(sequence)):
 
-        output, state = forward_prop_t(model, sequence[t], states[-1], filters=filters, dropout=dropout, output_t=actual_output[t])
+        output, state = forward_prop_t(model, sequence[t], states[-1], filters=filters, dropout=dropout)
 
         outputs.append(output)
         states.append(state)
@@ -225,7 +223,7 @@ def forward_prop(model, sequence, actual_output=None, context=None, gen_seed=Non
 
 
     states = [states[-1]]
-    outputs = [gen_seed] if gen_seed is not None else [outputs[-1]]     # sequence, an array of outputs, where out[0] = vocab, out[1] = rhythm
+    outputs = [gen_seed] if gen_seed is not None else [outputs[-1]]
 
     if gen_iterations is None:
 
@@ -242,7 +240,7 @@ def forward_prop(model, sequence, actual_output=None, context=None, gen_seed=Non
 
         for t in range(gen_iterations):
 
-            output, state = forward_prop_t(model, outputs[-1], states[-1], filters=filters, dropout=dropout)
+            output, state = forward_prop_t(model, outputs[-1], states[-1], filters=filters, dropout=dropout, target_t=response[t])
 
             outputs.append(output)
             states.append(state)
@@ -252,7 +250,7 @@ def forward_prop(model, sequence, actual_output=None, context=None, gen_seed=Non
     return outputs
 
 
-def forward_prop_t(model, sequence_t, context_t, filters, dropout, output_t=None):
+def forward_prop_t(model, sequence_t, context_t, filters, dropout, target_t=None):
 
     produced_outputs = []
     produced_context = []
@@ -472,10 +470,8 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, output_t=None
 
             input = sum(produced_context[-2])
             # input = decision_outputs[-1]
-            input2 = output_t[0] if output_t is not None else produced_outputs[0].unsqueeze(0)
-            # input2 = produced_outputs[0].unsqueeze(0)
-            # input2 = torch.tensor(produced_outputs[0].unsqueeze(0), requires_grad=False)
-
+            input2 = target_t[0] if target_t is not None else produced_outputs[0].unsqueeze(0)
+            # else torch.tensor(produced_outputs[0].unsqueeze(0), requires_grad=False)
             state = states[0]
 
             remember = torch.sigmoid(

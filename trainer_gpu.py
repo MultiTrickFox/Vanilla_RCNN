@@ -52,6 +52,8 @@ dropout = 0.0
 loss_multipliers = Vanilla.default_loss_multipliers
 
 
+is_gpu = False
+
     # # #
 
 
@@ -69,24 +71,32 @@ def train_rms(model, accu_grads, data, num_epochs=1):
 
             batch_loss = np.zeros_like(epoch_loss)
 
-            with Pool(num_workers) as pool:
+            if not is_gpu:
 
-                # create procs
+                with Pool(num_workers) as pool:
 
-                results = pool.map_async(process_fn, [[model.copy(), batch[_]] for _ in range(batch_size)])
+                    # create procs
 
-                pool.close()
+                    results = pool.map_async(process_fn, [[model.copy(), batch[_]] for _ in range(batch_size)])
 
-                # retrieve procs
+                    pool.close()
 
-                pool.join()
+                    # retrieve procs
 
-                for result in results.get():
-                    loss, grads = result
+                    pool.join()
 
-                    Vanilla.apply_grads(model,grads)
-                    batch_loss += loss
+                    for result in results.get():
+                        loss, grads = result
 
+                        Vanilla.apply_grads(model,grads)
+                        batch_loss += loss
+
+            else:
+
+                batch = [Tensor(e) for e in batch]
+                batch = torch.stack(batch, 0)
+                process_fn([model.copy(), batch], on_gpu=True)    # todo : to copy or not to copy..
+                # todo :
                 # handle
 
                 epoch_loss += batch_loss
@@ -98,7 +108,7 @@ def train_rms(model, accu_grads, data, num_epochs=1):
     return model, accu_grads, losses
 
 
-def process_fn(fn_input):
+def process_fn(fn_input, on_gpu=False):
 
     model, data = fn_input
     x_vocab, x_oct, x_dur, x_vol, y_vocab, y_oct, y_dur, y_vol = data
@@ -229,7 +239,7 @@ def train_adam(model, accu_grads, moments, data, epoch_nr=None, num_epochs=1):
 
 if __name__ == '__main__':
 
-    torch.set_default_tensor_type('torch.FloatTensor')
+    torch.set_default_tensor_type('torch.cuda.FloatTensor' if is_gpu else 'torch.FloatTensor')
 
     data = resources.load_data(data_path, data_size)
     IOdims = resources.vocab_size

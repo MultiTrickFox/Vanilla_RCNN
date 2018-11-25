@@ -12,7 +12,7 @@ import gc
 
     # parent details
 
-total_epochs = 40
+total_epochs = 50
 learning_rate_1 = 0.001
 learning_rate_2 = 0.01
 
@@ -340,13 +340,19 @@ def run_advanced_parenting(data):
 
 
 def parent_bootstrap():
-
+    
     print(f'Data size  : {data_size}')
     print(f'Batch size : {batch_size}')
     print(f'Epochs     : {total_epochs}')
-    print('')
 
-    torch.set_default_tensor_type('torch.FloatTensor')
+    if torch.cuda.is_available():
+        tensor_type = 'torch.cuda.FloatTensor'
+        trainer.is_gpu = True
+    else: tensor_type = 'torch.FloatTensor'
+    torch.set_default_tensor_type(tensor_type)
+    print(f'Running on: {tensor_type.split(".")[1]}')
+
+
     resources.initialize_loss_txt()
 
     data = get_data()
