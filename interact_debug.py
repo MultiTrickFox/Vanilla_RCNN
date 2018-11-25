@@ -2,6 +2,8 @@ import Vanilla
 import resources
 import preproc
 
+import torch
+
 
 max_octave = preproc.MAX_OCTAVE
 max_duration = preproc.MAX_DURATION
@@ -11,7 +13,7 @@ vocab_pick_thr = 0.3
 
 
 
-def bootstrap(data=None):
+def bootstrap(input_sequence=None, pick_thr=vocab_pick_thr):
 
 
     model = resources.load_model()
@@ -23,47 +25,38 @@ def bootstrap(data=None):
     chord_mode = input("hit 's' to Quit Chord Mode: ")
     chord_mode = False if chord_mode == 's' else True
 
-    conv = lambda output: ai_2_human(output, chord_mode=chord_mode)
+    conv = lambda output: ai_2_human(output, chord_mode=chord_mode, pick_thr=pick_thr)
 
-    if data is None:
+    if input_sequence is None:
 
-        while True:
+        input_sequence = get_user_input(int(input('Enter an Input Length: ')))
 
-            input_sequence = get_user_input(int(input('Enter an Input Length: ')))
+        responses = Vanilla.forward_prop(model, input_sequence)
 
-            responses = Vanilla.forward_prop(model, input_sequence)
+        converted_response = [conv(out_t) for out_t in responses]
 
-            converted_response = [conv(out_t) for out_t in responses]
+        for response in converted_response:
 
-            for response in converted_response:
+            print('---')
+            print(' Notes:', response[0])
+            print(' Octaves:', response[1])
+            print(' Durations:', response[2])
+            print(' Velocities:', response[3])
+            print('---')
 
-                print('---')
-                print(' Notes:', [resources.note_reverse_dict[_] for _ in response[0]])
-                print(' Octaves:', response[1])
-                print(' Durations:', response[2])
-                print(' Velocities:', response[3])
-                print('---')
+        print(f'Response length: {len(converted_response)}')
 
-            print(f'Response length: {len(converted_response)}')
+    else:
 
-            input()
+        response = Vanilla.forward_prop(model, input_sequence)
+        converted_response = [conv(out_t) for out_t in response]
 
-        else:
-            print("hit here")
-            response = Vanilla.forwprop(model, input_sequence)
-
-            converted_response = [conv(out_t) for out_t in response]
-
-            converted_response[0] = [resources.note_reverse_dict[_] for _ in converted_response[0]]
-            
-            return converted_response
+    return converted_response
     
 
 
 
 # converters
-
-import torch
 
 
 def ai_2_human(out_t, chord_mode=True, pick_thr=vocab_pick_thr):
@@ -84,6 +77,8 @@ def ai_2_human(out_t, chord_mode=True, pick_thr=vocab_pick_thr):
         sel_octs.append(round(float(octaves[vocab]) * max_octave))
         sel_durs.append(round(float(durations[vocab]) * max_duration))
         sel_vols.append(round(float(volumes[vocab]) * max_volume))
+
+    sel_vocabs = [resources.note_reverse_dict[_] for _ in sel_vocabs]
 
     return sel_vocabs, sel_octs, sel_durs, sel_vols
 
@@ -149,7 +144,7 @@ def get_user_input(inp_len):
     sequence = []
 
     for _ in range(len(vocab_seq)):
-        sequence.append([vocab_seq[_], oct_seq[_], dur_seq[_], vol_seq[_]])
+        sequence.append([torch.Tensor(e) for e in [vocab_seq[_], oct_seq[_], dur_seq[_], vol_seq[_]]])
 
 
     return sequence

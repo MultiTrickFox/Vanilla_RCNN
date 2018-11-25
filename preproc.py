@@ -225,7 +225,32 @@ empty_vect = [0 for _ in range(vocab_size)]
 
 
 def parse_to_data(file):
-    return parse_fn(import_fn(file))[:4]
+    from torch import Tensor
+
+    parsed_vectors = parse_fn(import_fn(file))
+    vocab_seq, oct_seq, dur_seq, vol_seq = parsed_vectors[0], parsed_vectors[2], parsed_vectors[4], parsed_vectors[6]
+
+    # print(len(vocab), len(oct), len(dur), len(vol))
+
+    vocab = []
+    oct = []
+    dur = []
+    vol = []
+    import random
+    [vocab.extend(e) for e in vocab_seq]
+    [oct.extend(e) for e in oct_seq]
+    [dur.extend(e) for e in dur_seq]
+    [vol.extend(e) for e in vol_seq]
+    vocab = vocab[:max_seq_len*2]
+    oct = oct[:max_seq_len*2]
+    dur = dur[:max_seq_len*2]
+    vol = vol[:max_seq_len*2]
+
+
+    seq = [[Tensor(e) for e in [vocab[_], oct[_], dur[_], vol[_]]]
+           for _ in range(len(vocab))]
+
+    return seq
 
 
 def preproc_bootstrap():
@@ -238,7 +263,7 @@ def preproc_bootstrap():
     print(f'Sample Files: {hm_files}')
     batch_len = int(hm_files / hm_batches)
     
-    for files in resources.batchify(raw_files, batch_len):
+    for batch_id, files in enumerate(resources.batchify(raw_files, batch_len)):
         
         data, len_data = preprocess(raw_files=files)
         resources.pickle_save(data, 'samples_' + str(batch_id) + '.pkl')

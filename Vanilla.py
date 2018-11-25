@@ -211,12 +211,11 @@ def forward_prop(model, sequence, actual_output=None, context=None, gen_seed=Non
     states = [context] if context is not None else init_states(model)
     outputs = []
 
-    for t in range(len(sequence[0])):
+    if actual_output is None: actual_output = [None] * len(sequence)
 
-        if actual_output is not None:    # todo : separate this into functions.
-            output, state = forward_prop_t(model, sequence[t], states[-1], filters=filters, dropout=dropout, output_t=actual_output[t])
-        else:
-            output, state = forward_prop_t(model, sequence[t], states[-1], filters=filters, dropout=0)
+    for t in range(len(sequence)):
+
+        output, state = forward_prop_t(model, sequence[t], states[-1], filters=filters, dropout=dropout, output_t=actual_output[t])
 
         outputs.append(output)
         states.append(state)
