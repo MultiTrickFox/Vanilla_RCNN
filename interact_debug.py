@@ -73,7 +73,7 @@ def ai_2_human(out_t, chord_mode=True, pick_thr=vocab_pick_thr):
 
     for vocab in sel_vocabs:
         sel_octs.append(round(float(octaves[vocab]) * max_octave))
-        sel_durs.append(float(durations[vocab]) * max_duration)
+        sel_durs.append(round(float(durations[vocab]) * max_duration, 2))
         sel_vols.append(round(float(volumes[vocab]) * max_volume))
 
     sel_vocabs = [resources.note_reverse_dict[_] for _ in sel_vocabs]

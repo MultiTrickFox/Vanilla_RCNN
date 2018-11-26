@@ -7,7 +7,7 @@ pick_thr = \
 float(input("Decision Threshold: "))
 
 print('Processing data..')
-data = preproc.parse_to_data(glob.glob("*.mid")[-1])
+data = preproc.midi_to_data(glob.glob("*.mid")[-1])
 print('Asking ai..')
 response = interact_debug.bootstrap(data, pick_thr)
 
