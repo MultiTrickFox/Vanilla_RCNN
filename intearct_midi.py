@@ -1,15 +1,19 @@
 import interact_debug
 import preproc
 
-pick_thr = 0.3
-
-
 import glob
 
-data = preproc.midi_to_data(glob.glob("*.mid")[-1])
+pick_thr = \
+float(input("Decision Threshold: "))
+
+print('Processing data..')
+data = preproc.parse_to_data(glob.glob("*.mid")[-1])
+print('Asking ai..')
 response = interact_debug.bootstrap(data, pick_thr)
 
+print("-----")
 for resp_step in response:
     for stuff in resp_step:
         print(stuff)
     print("-----")
+input()

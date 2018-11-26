@@ -11,7 +11,7 @@ import numpy as np
 
     # parent details
 
-total_epochs = 40
+total_epochs = 20
 learning_rate_1 = 0.001
 learning_rate_2 = 0.01
 
@@ -29,7 +29,7 @@ layers = (10, 8, 12)
     # data details
 
 data_path = "samples_*.pkl"
-data_size = 30_000
+data_size = 25_000
 batch_size = 400
 
 

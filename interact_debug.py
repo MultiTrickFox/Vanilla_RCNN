@@ -72,9 +72,9 @@ def ai_2_human(out_t, chord_mode=True, pick_thr=vocab_pick_thr):
         if chord_mode else [torch.argmax(vocabs).item()]
 
     for vocab in sel_vocabs:
-        sel_octs.append(float(octaves[vocab]) * max_octave)
+        sel_octs.append(round(float(octaves[vocab]) * max_octave))
         sel_durs.append(float(durations[vocab]) * max_duration)
-        sel_vols.append(float(volumes[vocab]) * max_volume)
+        sel_vols.append(round(float(volumes[vocab]) * max_volume))
 
     sel_vocabs = [resources.note_reverse_dict[_] for _ in sel_vocabs]
 
@@ -94,7 +94,7 @@ def human_2_ai(data):
     vol_vect   = preproc.empty_vect.copy()
 
     for i, note in enumerate(c_notes):
-        duplicate_note = False if vocab_vect[note] == 0 else True
+        duplicate_note = (vocab_vect[note] != 0)
         vocab_vect[note] += 1
         oct_vect[note]   += float(octaves[i])
         dur_vect[note]   += float(durations[i])
