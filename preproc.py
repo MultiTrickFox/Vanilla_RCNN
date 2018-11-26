@@ -202,19 +202,22 @@ def bootstrap():
     data_size = 0
 
     print(f'Detected {hm_files} files.')
-    batch_len = int(hm_files / hm_batches)
+    if hm_files != 0:
+        batch_len = int(hm_files / hm_batches)
 
-    for batch_id, files in enumerate(resources.batchify(raw_files, batch_len)):
+        for batch_id, files in enumerate(resources.batchify(raw_files, batch_len)):
 
-        data = preprocess(raw_files=files)
+            data = preprocess(raw_files=files)
 
-        resources.pickle_save(data, 'samples_' + str(batch_id) + '.pkl')
-        data_size += len(data)
-        data = None ; gc.collect()
+            resources.pickle_save(data, 'samples_' + str(batch_id) + '.pkl')
+            data_size += len(data)
+            data = None ; gc.collect()
 
-        print(f'Batch {batch_id} of {hm_batches} completed : Total of {data_size} samples.')
-    print(f'Total of {data_size} samples saved.')
-    return data_size
+            print(f'Batch {batch_id} of {hm_batches} completed : Total of {data_size} samples.')
+        print(f'Total of {data_size} samples saved.')
+        return data_size
+    else:
+        print('Import Error : Copy .midis under /samples')
 
 
 
