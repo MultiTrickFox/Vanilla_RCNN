@@ -338,7 +338,7 @@ def run_advanced_parenting(data):
 
 
 
-def parent_bootstrap():
+def bootstrap():
 
     print(f'Data size  : {data_size}')
     print(f'Batch size : {batch_size}')
@@ -365,4 +365,4 @@ def parent_bootstrap():
 
 if __name__ == '__main__':
 
-    parent_bootstrap()
+    bootstrap()

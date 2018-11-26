@@ -1,13 +1,13 @@
 import Vanilla
 import resources
-import preproc
+import preprocessor
 
 import torch
 
 
-max_octave = preproc.MAX_OCTAVE
-max_duration = preproc.MAX_DURATION
-max_volume = preproc.MAX_VOLUME
+max_octave = preprocessor.MAX_OCTAVE
+max_duration = preprocessor.MAX_DURATION
+max_volume = preprocessor.MAX_VOLUME
 
 vocab_pick_thr = 0.3
 
@@ -88,10 +88,10 @@ def human_2_ai(data):
 
     c_notes = [resources.note_dict[notes[i].upper()] for i in range(inp_len)]
 
-    vocab_vect = preproc.empty_vect.copy()
-    oct_vect   = preproc.empty_vect.copy()
-    dur_vect   = preproc.empty_vect.copy()
-    vol_vect   = preproc.empty_vect.copy()
+    vocab_vect = preprocessor.empty_vect.copy()
+    oct_vect   = preprocessor.empty_vect.copy()
+    dur_vect   = preprocessor.empty_vect.copy()
+    vol_vect   = preprocessor.empty_vect.copy()
 
     for i, note in enumerate(c_notes):
         duplicate_note = (vocab_vect[note] != 0)

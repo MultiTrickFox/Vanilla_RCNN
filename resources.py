@@ -168,8 +168,11 @@ def get_datasize(data_path):
 
 def batchify(resource, batch_size):
     hm_batches = int(len(resource) / batch_size)
-    return [resource[_ * batch_size : (_+1) * batch_size]
+    batched_resource = [resource[_ * batch_size : (_+1) * batch_size]
                         for _ in range(hm_batches)]
+    hm_leftover = len(resource) % batch_size
+    batched_resource.append(resource[-hm_leftover:])
+    return batched_resource
 
 
 def plot_loss_txts(hm_mins_refresh=2):

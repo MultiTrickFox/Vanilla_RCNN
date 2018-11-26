@@ -1,12 +1,12 @@
 import torch
 import random
 
+import preproc
+
 
 hm_vectors = 4
 vector_size = 13
 
-
-cond_stop_dur = 2.0
 max_prop_time = 20
 
 
@@ -571,16 +571,6 @@ def init_states(model):
     return [states_t0]
 
 
-def stop_cond(output_t):
-
-    durations = output_t[2]
-
-    for dur in durations:
-        if float(dur) >= cond_stop_dur:
-            return True
-    return False
-
-
 def return_grads(model):
     grads = []
     for _,layer in enumerate(model):
@@ -598,3 +588,9 @@ def apply_grads(model, grads):
             else: layer[w].grad += this_grad
 
             ctr +=1
+
+
+def stop_cond(output_t):
+
+    durations = output_t[2].numpy()
+    return preproc.split_cound(durations)
