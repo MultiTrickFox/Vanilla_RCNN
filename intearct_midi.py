@@ -8,11 +8,18 @@ pick_thr = \
 pick_thr = float(pick_thr) if pick_thr != "" \
     else interact_debug.vocab_pick_thr
 
-file = glob.glob("*.mid")[-1] ; print(f'Obtained file: {file}')
+try:
+    file = glob.glob("*.mid")[-1]
+    print(f'Obtained file: {file}')
+except:
+    print('Error : No .mid files found.')
+    file = None
 
 try:
-    print('Processing data..')
-    data = preproc.midi_to_data(file)
+    if file is not None:
+        print('Processing data..')
+        data = preproc.midi_to_data(file)
+    else: data = None
 except:
     data = None
     print('Error : Provided file could not be processed.')
@@ -27,5 +34,7 @@ try:
             for stuff in resp_step:
                 print(stuff)
             print("-----")
-        input()
 except: print('Error : No response could be generated for given file.')
+
+
+input()
