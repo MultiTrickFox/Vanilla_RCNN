@@ -6,7 +6,7 @@ pick_thr = 0.3
 
 import glob
 
-data = preproc.parse_to_data(glob.glob("*.mid")[-1])
+data = preproc.midi_to_data(glob.glob("*.mid")[-1])
 response = interact_debug.bootstrap(data, pick_thr)
 
 for resp_step in response:

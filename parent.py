@@ -7,7 +7,6 @@ import time
 import torch
 import numpy as np
 
-import gc
 
 
     # parent details
@@ -21,8 +20,8 @@ learning_rate_2 = 0.01
 
 filters =                    \
     Vanilla.default_filters +  \
-    () #+                       \
-    # ((4, 7), (3, 7), (9, 4))   \
+    ()  # +                       \
+    #   ((4, 7), (3, 7), (9, 4))  \
 
 layers = (10, 8, 12)
 

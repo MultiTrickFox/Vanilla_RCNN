@@ -224,11 +224,15 @@ def ready_stream(stream):
 empty_vect = [0 for _ in range(vocab_size)]
 
 
-def parse_to_data(file):
+def midi_to_data(file):
     from torch import Tensor
 
     parsed_vectors = parse_fn(import_fn(file))
-    vocab_seq, oct_seq, dur_seq, vol_seq = parsed_vectors[0], parsed_vectors[2], parsed_vectors[4], parsed_vectors[6]
+
+    vocab_seq = parsed_vectors[0]
+    oct_seq = parsed_vectors[2]
+    dur_seq = parsed_vectors[4]
+    vol_seq = parsed_vectors[6]
 
     # print(len(vocab), len(oct), len(dur), len(vol))
 
@@ -236,7 +240,7 @@ def parse_to_data(file):
     oct = []
     dur = []
     vol = []
-    import random
+
     [vocab.extend(e) for e in vocab_seq]
     [oct.extend(e) for e in oct_seq]
     [dur.extend(e) for e in dur_seq]
@@ -253,7 +257,7 @@ def parse_to_data(file):
     return seq
 
 
-def preproc_bootstrap():
+def bootstrap():
     global hm_batches
     data_size = 0
 
@@ -277,4 +281,4 @@ def preproc_bootstrap():
 
 
 if __name__ == '__main__':
-    preproc_bootstrap()
+    bootstrap()

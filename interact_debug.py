@@ -56,7 +56,7 @@ def bootstrap(input_sequence=None, pick_thr=vocab_pick_thr):
 
 
 
-# converters
+# helper-converters
 
 
 def ai_2_human(out_t, chord_mode=True, pick_thr=vocab_pick_thr):
@@ -68,15 +68,13 @@ def ai_2_human(out_t, chord_mode=True, pick_thr=vocab_pick_thr):
     sel_durs   = []
     sel_vols   = []
 
-    if chord_mode:
-        sel_vocabs = [_ for _,e in enumerate(vocabs) if e.item() >= pick_thr]
-    else:
-        sel_vocabs = [torch.argmax(vocabs).item()]
+    sel_vocabs = [_ for _,e in enumerate(vocabs) if e.item() >= pick_thr] \
+        if chord_mode else [torch.argmax(vocabs).item()]
 
     for vocab in sel_vocabs:
-        sel_octs.append(round(float(octaves[vocab]) * max_octave))
-        sel_durs.append(round(float(durations[vocab]) * max_duration))
-        sel_vols.append(round(float(volumes[vocab]) * max_volume))
+        sel_octs.append(float(octaves[vocab]) * max_octave)
+        sel_durs.append(float(durations[vocab]) * max_duration)
+        sel_vols.append(float(volumes[vocab]) * max_volume)
 
     sel_vocabs = [resources.note_reverse_dict[_] for _ in sel_vocabs]
 
