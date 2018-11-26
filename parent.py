@@ -11,7 +11,7 @@ import numpy as np
 
     # parent details
 
-total_epochs = 40
+total_epochs = 20
 learning_rate_1 = 0.001
 learning_rate_2 = 0.01
 
@@ -29,7 +29,7 @@ layers = (10, 8, 12)
     # data details
 
 data_path = "samples_*.pkl"
-data_size = 30_000
+data_size = 25_000
 batch_size = 400
 
 
@@ -49,6 +49,8 @@ save_intermediate_model = True
 save_model_per_epoch = 10
 
 branch_ctr_max = 5
+
+really_random_data = True
 
 loss_multipliers = (1, 1, 1, 1)
 
@@ -277,7 +279,7 @@ def advanced_parenting(model, accugrads, moments, data):
 
 # helpers
 
-def get_data(): return resources.load_data(data_path, data_size)
+def get_data(): return resources.load_data(data_path, data_size,really_random=really_random_data)
 
 def get_clock(): return time.asctime(time.localtime(time.time())).split(' ')[3]
 
