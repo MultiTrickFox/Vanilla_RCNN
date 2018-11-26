@@ -227,6 +227,8 @@ empty_vect = [0 for _ in range(vocab_size)]
 def midi_to_data(file):
     from torch import Tensor
 
+    how_much_of_the_file = max_seq_len*2
+
     parsed_vectors = parse_fn(import_fn(file))
 
     vocab_seq = parsed_vectors[0]
@@ -245,10 +247,10 @@ def midi_to_data(file):
     [oct.extend(e) for e in oct_seq]
     [dur.extend(e) for e in dur_seq]
     [vol.extend(e) for e in vol_seq]
-    vocab = vocab[:max_seq_len*2]
-    oct = oct[:max_seq_len*2]
-    dur = dur[:max_seq_len*2]
-    vol = vol[:max_seq_len*2]
+    vocab = vocab[:how_much_of_the_file]
+    oct = oct[:how_much_of_the_file]
+    dur = dur[:how_much_of_the_file]
+    vol = vol[:how_much_of_the_file]
 
 
     seq = [[Tensor(e) for e in [vocab[_], oct[_], dur[_], vol[_]]]
