@@ -38,8 +38,10 @@ def preproc(raw_file):
     imported_file = import_file(raw_file)
     if imported_file is not None:
         converted_file = convert_file(imported_file)
+        imported_file = 0 ; gc.collect()
         if len(converted_file) != 0:
             data = parse_file(converted_file)
+            converted_file = 0 ; gc.collect()
             if len(data[0]) != 0:
                 return data
     return [[],[]]
@@ -127,7 +129,7 @@ def parse_file(stream):
 
 def split_cond(dur_vect):
     for dur in dur_vect:
-        if dur >= SPLIT_DURATION / MAX_DURATION: return True
+        if dur >= SPLIT_DURATION: return True
     return False
 
 

@@ -1,5 +1,5 @@
 import interact_debug
-import preprocessor
+import preproc
 
 import glob
 
@@ -18,7 +18,7 @@ except:
 try:
     if file is not None:
         print('Processing data..')
-        data = preprocessor.midi_to_data(file)
+        data = preproc.midi_to_data(file)
     else: data = None
 except:
     data = None

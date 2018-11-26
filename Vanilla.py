@@ -1,13 +1,14 @@
 import torch
 import random
 
-import preproc
-
 
 hm_vectors = 4
 vector_size = 13
 
 max_prop_time = 20
+
+MAX_DURATION = 8
+SPLIT_DURATION = 2
 
 
 default_layers = (8, 5, 10)
@@ -593,4 +594,6 @@ def apply_grads(model, grads):
 def stop_cond(output_t):
 
     durations = output_t[2].numpy()
-    return preproc.split_cound(durations)
+    for dur in durations:
+        if dur >= SPLIT_DURATION / MAX_DURATION: return True
+    return False
