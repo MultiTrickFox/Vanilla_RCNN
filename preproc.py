@@ -11,8 +11,8 @@ from music21 import converter
 
 SPLIT_DURATION = 2
 
-min_phrase_length = 5
-max_phrase_length = 25
+min_phrase_len = 5
+max_phrase_len = 25
 
 MAX_OCTAVE = 7
 MAX_DURATION = 8
@@ -95,11 +95,23 @@ def convert_file(imported_file):
 
 
 def parse_file(stream):
+
+    phrase_container = []
+    phrase_stream = []
+
+    for e in stream:
+        phrase_container.append(e)
+
+        if split_cond(e[2]):
+
+            if min_phrase_len <= len(phrase_container) <= max_phrase_len:
+                phrase_stream.append(phrase_container)
+
     data = [[],[]]  # data = phrases_X & phrases_Y
 
-    if len(stream)>= 2:
-        for i, thing in enumerate(stream[:-1]):
-            thingp1 = stream[i+1]
+    if len(phrase_stream)>= 2:
+        for i, thing in enumerate(phrase_stream[:-1]):
+            thingp1 = phrase_stream[i+1]
             # for container, phrase in zip(data, [thing, thingp1]):
             #     container.append(phrase)
             data[0].append(thing)
