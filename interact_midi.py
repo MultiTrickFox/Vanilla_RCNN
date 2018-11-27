@@ -10,8 +10,8 @@ def bootstrap():
     try:
         file = glob.glob("*.mid")[-1]
         print(f'Obtained file: {file}')
-    except:
-        print('Error : No .mid files found.')
+    except Exception as e:
+        print('Error : No .mid files found.',e)
         file = None
 
     try:
@@ -19,19 +19,21 @@ def bootstrap():
             print('Processing data..')
             data = preproc.midi_to_stream(file)
         else: data = None
-    except:
+    except Exception as e:
         data = None
-        print('Error : Provided file could not be processed.')
+        print('Error : Provided file could not be processed.',e)
 
-    if data is not None:
-        print('Asking ai..')
-        response = interact_debug.bootstrap(data)
+    try:
+        if data is not None:
+            print('Asking ai..')
+            response = interact_debug.bootstrap(data)
 
-        print("-----")
-        for resp_step in response:
-            for stuff in resp_step:
-                print(stuff)
             print("-----")
+            for resp_step in response:
+                for stuff in resp_step:
+                    print(stuff)
+                print("-----")
+    except Exception as e: print('Error : No response could be generated for given file.',e)
 
 
 if __name__ == '__main__':
