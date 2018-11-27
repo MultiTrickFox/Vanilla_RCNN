@@ -5,12 +5,13 @@ is a from-scratch RCNN, using only pytorch's autograd
 
 >(built on torch 0.4.0, provided https://github.com/developersfox/Pytorch-0.4-_custom -> 
 run cpu.bat)
-also music21 v5.0.1 is required for preproc 
-& advanced interaction. (not required for basic func.)
+also music21 v5.0.1 is required for preprocess 
+& interaction purposes
 (pip3 install -Iv music21==5.0.1
 
 
 >Notice : versions mentioned above are required & else is known to have bugs.
+
 
 
 How To Use:
@@ -30,7 +31,7 @@ Responding to midi
 
 Musescore interaction: 
 
->- I/O via MuseScore. (Requires : https://musescore.org/en. & music21 5.0.1)
+>- I/O via MuseScore. ( Requires : https://musescore.org/en. )
 
 >- runner -> interact
 
