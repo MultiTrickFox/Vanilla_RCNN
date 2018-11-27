@@ -5,7 +5,6 @@ import gc
 from multiprocessing import Pool, cpu_count
 from glob import glob
 
-from music21 import converter
 
 #   params
 
@@ -68,7 +67,7 @@ def preprocess(raw_files):
 
 def import_file(raw_file):
     try:
-        prepared_file = converter.parse(raw_file)
+        prepared_file = music21.converter.parse(raw_file)
 
         # def_mtr = music21.meter.TimeSignature('4/4')
         # for element in stream:
@@ -201,7 +200,8 @@ def midi_to_stream(raw_file):
 
 
 def bootstrap():
-
+    import music21
+    
     raw_files = glob('samples/*.mid')
     hm_files = len(raw_files)
     data_size = 0
