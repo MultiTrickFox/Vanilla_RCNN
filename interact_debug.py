@@ -25,8 +25,8 @@ def bootstrap(input_sequence=None):
     chord_mode = input("hit 's' for Chord Mode -> Solo Mode: ")
     chord_mode = False if chord_mode == 's' else True
     if chord_mode:
-        pick_thr = input("Chord Decision Sensitivity: ")
-        if pick_thr != "": pick_thr = 1-float(pick_thr)
+        pick_thr_inp = input("Chord Decision Sensitivity: ")
+        if pick_thr_inp != "": pick_thr = 1-float(pick_thr_inp)
 
 
     conv = lambda output: ai_2_human(output, chord_mode=chord_mode, pick_thr=pick_thr)
