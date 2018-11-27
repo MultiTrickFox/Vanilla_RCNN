@@ -23,17 +23,15 @@ def bootstrap():
         data = None
         print('Error : Provided file could not be processed.')
 
-    try:
-        if data is not None:
-            print('Asking ai..')
-            response = interact_debug.bootstrap(data)
+    if data is not None:
+        print('Asking ai..')
+        response = interact_debug.bootstrap(data)
 
+        print("-----")
+        for resp_step in response:
+            for stuff in resp_step:
+                print(stuff)
             print("-----")
-            for resp_step in response:
-                for stuff in resp_step:
-                    print(stuff)
-                print("-----")
-    except: print('Error : No response could be generated for given file.')
 
 
 if __name__ == '__main__':

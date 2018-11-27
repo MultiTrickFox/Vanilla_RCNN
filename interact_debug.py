@@ -9,12 +9,12 @@ max_octave = preproc.MAX_OCTAVE
 max_duration = preproc.MAX_DURATION
 max_volume = preproc.MAX_VOLUME
 
-default_pick_thr = 0.3
+pick_thr = (1-0.3)
 
 
 
 def bootstrap(input_sequence=None):
-
+    global pick_thr
 
     model = resources.load_model()
     while model is None:
@@ -22,12 +22,11 @@ def bootstrap(input_sequence=None):
         model = resources.load_model() if model_id == '' else resources.load_model(model_id)
 
 
-    chord_mode = input("hit 's' to Quit Chord Mode: ")
+    chord_mode = input("hit 's' for Chord Mode -> Solo Mode: ")
     chord_mode = False if chord_mode == 's' else True
     if chord_mode:
-        pick_thr = input("Decision Threshold: ")
-        pick_thr = float(pick_thr) if pick_thr != "" \
-            else default_pick_thr
+        pick_thr = input("Chord Decision Sensitivity: ")
+        if pick_thr != "": pick_thr = 1-float(pick_thr)
 
 
     conv = lambda output: ai_2_human(output, chord_mode=chord_mode, pick_thr=pick_thr)
@@ -57,7 +56,6 @@ def bootstrap(input_sequence=None):
         # input_sequence = [[torch.Tensor(e) for e in sequence_t] for sequence_t in input_sequence]
         sequence = resources.tensorify_sequence(input_sequence)
         response = Vanilla.forward_prop(model, sequence)
-        print('DONE.')
         converted_response = [conv(out_t) for out_t in response]
 
     return converted_response
@@ -68,7 +66,7 @@ def bootstrap(input_sequence=None):
 # helper-converters
 
 
-def ai_2_human(out_t, chord_mode=True, pick_thr=default_pick_thr):
+def ai_2_human(out_t, chord_mode=True, pick_thr=pick_thr):
 
     vocabs, octaves, durations, volumes = out_t
 
