@@ -28,7 +28,7 @@ filters = Vanilla.default_filters
     # basic params
 
 
-epochs = 30
+epochs = 20
 learning_rate = 0.002
 
 # batch_size = 400 ; data_size = 10_000
@@ -73,7 +73,7 @@ def train_rms(model, accu_grads, data, num_epochs=1):
 
                 # create procs
 
-                results = pool.map_async(process_fn, [[model.copy(), batch[_]] for _ in range(batch_size)])
+                results = pool.map_async(process_fn, [[model.copy(), e] for e in batch])
 
                 pool.close()
 
@@ -198,7 +198,7 @@ def train_adam(model, accu_grads, moments, data, epoch_nr=None, num_epochs=1):
 
                 # create procs
 
-                results = pool.map_async(process_fn, [[model.copy(), batch[_]] for _ in range(batch_size)])
+                results = pool.map_async(process_fn, [[model.copy(), e] for e in batch])
 
                 pool.close()
 

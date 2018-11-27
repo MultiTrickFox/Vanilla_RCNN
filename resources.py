@@ -5,7 +5,7 @@ import music21
 
 from music21 import converter # note, chord
 from multiprocessing import Pool, cpu_count
-
+from torch import Tensor
 
 
 note_dict = {
@@ -173,6 +173,13 @@ def batchify(resource, batch_size):
         batched_resource.append(resource[-hm_leftover:])
 
     return batched_resource
+
+def tensorify_sequence(sequence):
+    return tuple(tuple(Tensor(e) for e in sequence_t)
+                 for sequence_t in sequence)
+
+
+# others
 
 
 def plot_loss_txts(hm_mins_refresh=2):

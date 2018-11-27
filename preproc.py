@@ -192,11 +192,12 @@ def vectorize_element(element):
 
 
 
-def midi_to_data(raw_file):
-    data = preproc(raw_file)
-    if len(data[0]) == 0:
-        print('Import Error : No Data was extracted.')
-    return data
+def midi_to_stream(raw_file):
+    imported_file = import_file(raw_file)
+    if imported_file is not None:
+        return convert_file(imported_file)
+    return []
+
 
 
 def bootstrap():

@@ -204,12 +204,14 @@ def forward_prop(model, sequence, response=None, context=None, gen_seed=None, ge
     if gen_iterations is None:
 
         t = 0
-        while t < max_prop_time and not stop_cond(outputs[-1]):
+        while t < max_prop_time:
 
             output, state = forward_prop_t(model, outputs[-1], states[-1], filters=filters, dropout=0.0)
 
             outputs.append(output)
             states.append(state)
+
+            if stop_cond(outputs[-1]): break
             t += 1
 
     else:
@@ -591,9 +593,10 @@ def apply_grads(model, grads):
             ctr +=1
 
 
+scaled_stop_dur = SPLIT_DURATION / MAX_DURATION
 def stop_cond(output_t):
 
-    durations = output_t[2].numpy()
+    durations = output_t[2].detach().numpy()
     for dur in durations:
-        if dur >= SPLIT_DURATION / MAX_DURATION: return True
+        if dur >= scaled_stop_dur: return True
     return False
