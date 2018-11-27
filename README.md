@@ -1,6 +1,5 @@
 # Vanilla_RCNN
->convolution on chord intervals
-
+convolution on chord intervals
 
 is a from-scratch RCNN, using only pytorch's autograd 
 
@@ -43,17 +42,18 @@ Delete the provided model.pkl
 Custom dataset available on:
 >https://www.floydhub.com/developersfox/datasets/jazz_piano
 
-Ctrl+C .mid files into /samples,
-from Runner:
+Ctrl+C .pkl files into project dir
 
 
->- Preprocess
 
 
->- Training
-  
- 
+(Optional) for training on custom .mid files, place them as projectdir/samples/<somefile>.mid
+
+>- (Optional) runner -> preprocess
 
 
+Have .pkl files ready at project dir
+
+>- runner -> training
 
 
