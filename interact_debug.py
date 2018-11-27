@@ -36,17 +36,17 @@ def bootstrap(input_sequence=None):
 
         input_sequence = get_user_input(int(input('Enter an Input Length: ')))
 
-        responses = Vanilla.forward_prop(model, input_sequence)
+        response = Vanilla.forward_prop(model, input_sequence)
 
-        converted_response = [conv(out_t) for out_t in responses]
+        converted_response = [conv(out_t) for out_t in response]
 
-        for response in converted_response:
+        for resp_conv, resp_act in zip(converted_response, response):
 
             print('---')
-            print(' Notes:', response[0])
-            print(' Octaves:', response[1])
-            print(' Durations:', response[2])
-            print(' Velocities:', response[3])
+            print(' Notes:', resp_conv[0], resp_act[0])
+            print(' Octaves:', resp_conv[1], resp_act[1])
+            print(' Durations:', resp_conv[2], resp_act[2])
+            print(' Velocities:', resp_conv[3], resp_act[3])
             print('---')
 
         print(f'Response length: {len(converted_response)}')
@@ -77,6 +77,7 @@ def ai_2_human(out_t, chord_mode=True, pick_thr=pick_thr):
 
     sel_vocabs = [_ for _,e in enumerate(vocabs) if e.item() >= pick_thr] \
         if chord_mode else [torch.argmax(vocabs).item()]
+    if sel_vocabs == []: sel_vocabs = [torch.argmax(vocabs).item()]
 
     for vocab in sel_vocabs:
         sel_octs.append(round(float(octaves[vocab]) * max_octave))

@@ -5,6 +5,8 @@ import gc
 from multiprocessing import Pool, cpu_count
 from glob import glob
 
+import music21
+
 
 #   params
 
@@ -200,7 +202,6 @@ def midi_to_stream(raw_file):
 
 
 def bootstrap():
-    import music21
     
     raw_files = glob('samples/*.mid')
     hm_files = len(raw_files)
