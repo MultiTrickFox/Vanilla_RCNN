@@ -33,10 +33,10 @@ from Runner:
 2- Using provided model:
 
 
->- responding to file.mid: copy .mid into main directory, runner -> midi response
+>- responding to midi: copy .mid file into project dir & runner -> midi response
 
 
->- musescore interaction: runner -> interact for I/O via MuseScore. https://musescore.org/en.
+>- musescore interaction: runner -> interact ( I/O via MuseScore. https://musescore.org/en. )
 
 
 
