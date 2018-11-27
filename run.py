@@ -17,8 +17,8 @@ def main():
         elif inp == '2':
             preproc.bootstrap()
         elif inp == '3':
-            str = input('<epoch>,<datasize>,<batchsize> ')
-            ep, ds, bs = [int(e) for e in str.split(",")]
+            str = input('<datasize> <batchsize> <epochs>: ')
+            ds, bs, ep = [int(e) for e in str.split(" ")]
             parent.bootstrap(True, ep, ds, bs)
         elif inp == '4':
             interact_midi.bootstrap()
@@ -27,9 +27,10 @@ def main():
 
 
 def display_options():
+    print('** Options **')
     print('1- Get current datasize')
     print('2- Preprocess samples')
-    print('3- Train <Epochs, Datasize, Batchsize>')
+    print('3- Train')
     print('4- Process .mid file')
     print('5- Interact')
     print()

@@ -345,7 +345,7 @@ def bootstrap(custom=False,ep=None,ds=None,bs=None):
     if custom:
         global data_size   ; data_size    = ds
         global batch_size  ; batch_size   = bs
-        global total_epocs ; total_epochs = ep
+        global total_epochs; total_epochs = ep
         
 
     print(f'Data size  : {data_size}')
