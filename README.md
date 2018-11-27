@@ -17,7 +17,26 @@ also music21 v5.0.1 is required for preproc
 How To Use:
 
 
-1- (Optional) Starting from scratch:
+1- With provided model:
+
+
+Responding to midi
+
+
+>- copy .mid file into project dir
+
+
+>- runner -> midi response
+
+
+Musescore interaction: 
+
+>- I/O via MuseScore. (Requires : https://musescore.org/en. & music21 5.0.1)
+
+>- runner -> interact
+
+
+2- (Optional) Start from scratch:
 
 Delete the provided model.pkl
 
@@ -26,17 +45,15 @@ Custom dataset available on:
 
 Ctrl+C .mid files into /samples,
 from Runner:
-  >Preprocess &
-  >Training
+
+
+>- Preprocess
+
+
+>- Training
   
  
-2- Using provided model:
 
-
->- responding to midi: copy .mid file into project dir & runner -> midi response
-
-
->- musescore interaction: runner -> interact ( I/O via MuseScore. https://musescore.org/en. )
 
 
 
