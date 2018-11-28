@@ -26,14 +26,14 @@ Responding to midi
 >- copy .mid file into project dir
 
 
->- runner -> midi response
+>- run.py -> midi response
 
 
 Musescore interaction: 
 
 >- I/O via MuseScore. ( Requires : https://musescore.org/en. )
 
->- runner -> interact
+>- run.py -> interact
 
 
 2- (Optional) Start from scratch:
@@ -48,13 +48,13 @@ Ctrl+C .pkl files into project dir
 
 
 
-(Optional) for training on custom .mid files, place them as projectdir/samples/<somefile>.mid
+(Optional) for training on custom .mid files, paste as projectdir/samples/your_file.mid
 
->- (Optional) runner -> preprocess
+>- (Optional) run.py -> preprocess
 
 
 Have .pkl files ready at project dir
 
->- runner -> training
+>- run.py -> training
 
 
