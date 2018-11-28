@@ -13,7 +13,7 @@ http://download.pytorch.org/whl/cu90/torch-0.4.0-cp36-cp36m-win_amd64.whl - pyth
 (pip3 install -Iv music21==5.1.0
 
 
->Notice : versions mentioned above are required & else is known to have bugs.
+>Notice : same versions mentioned above are required & else is known to have bugs.
 
 
 
@@ -37,9 +37,9 @@ Responding to midi
 >- Run.py -> Midi Response
 
 
-Musescore interaction: 
+Musescore interaction 
 
->- ( Requires : https://musescore.org/en. )
+>- ( requires : https://musescore.org/en. )
 
 >- Run.py -> Interact
 
@@ -68,7 +68,7 @@ Delete the provided model.pkl
 >- Or, run.py -> debug (brings up debug menu)
 
 
-Custom dataset available on:
+Custom dataset available on
 >https://www.floydhub.com/developersfox/datasets/jazz_piano
 
 
@@ -77,11 +77,11 @@ Ctrl+C .pkl files into project dir
 >.pkls are preprocessed .mid files
 
 
-(Optional) For training on your own .mid files:
+(Optional) For training on your own .mid files
 
->- Create Folder /samples in project dir
+>- Create /samples in project dir
 
->- Ctrl+C .mid files under /samples
+>- Ctrl+C .mid files in /samples
 
 >- Run.py -> Preprocess
 
