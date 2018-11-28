@@ -142,10 +142,10 @@ def save_accugrads(accu_grads, model_id=None):
 
 def load_accugrads(model, model_id=None):
     model_id = '' if model_id is None else str(model_id)
-    try:
-        accu_grads = resources.pickle_load('model' + model_id + '_accugrads.pkl')
+    accu_grads = resources.pickle_load('model' + model_id + '_accugrads.pkl')
+    if accu_grads is not None:
         print('> accugrads.pkl loaded.')
-    except:
+    else:
         print('> accugrads.pkl not found.')
         accu_grads = init_accugrads(model)
     return accu_grads
@@ -166,10 +166,10 @@ def save_moments(moments, model_id=None):
 
 def load_moments(model, model_id=None):
     model_id = '' if model_id is None else str(model_id)
-    try:
-        moments = resources.pickle_load('model' + model_id + '_moments.pkl')
+    moments = resources.pickle_load('model' + model_id + '_moments.pkl')
+    if moments is not None:
         print('> moments.pkl loaded.')
-    except:
+    else:
         print('> moments.pkl not found.')
         moments = init_moments(model)
     return moments

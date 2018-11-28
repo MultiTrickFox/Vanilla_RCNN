@@ -28,9 +28,9 @@ layers = (10, 8, 12)
 
     # data details
 
-data_path = "samples_*.pkl"
-data_size = 25_000
-batch_size = 400
+data_path = "sample*.pkl"
+data_size = 10 # 30_000
+batch_size = 10 # 400
 
 
     # training details
@@ -58,7 +58,7 @@ loss_multipliers = (1, 1, 1, 1)
     # global declarations
 
 loss_initial = \
-    [[999_999_999,999_999_999,999_999_999,999_999_999]]
+    ([999_999_999,999_999_999,999_999_999,999_999_999])
 
 trainer.layers = layers
 trainer.filters = filters
@@ -68,7 +68,9 @@ trainer.loss_multipliers = loss_multipliers
 
 
 
-def simple_parenting(model, accugrads, data):
+
+
+def simple_parenting(model, accugrads, data, last_loss):
 
 
         # initial conditions
@@ -81,7 +83,7 @@ def simple_parenting(model, accugrads, data):
 
     checkpoints = []
 
-    prevStep = (model, accugrads, loss_initial)
+    prevStep = (model, accugrads, last_loss)
 
 
         # begin parenting
@@ -110,8 +112,7 @@ def simple_parenting(model, accugrads, data):
 
             if save_intermediate_model and successful_epochs % save_model_per_epoch == 0:
                 ctr_save_id +=1 ; save_id = ctr_save_id * 0.001
-                resources.save_model(prevStep[0], save_id)
-                trainer.save_accugrads(prevStep[1], save_id)
+                save_checkpoint(prevStep, save_id)
                 print(f'Data saved : Part {ctr_save_id}')
 
             prevStep = thisStep
@@ -154,8 +155,7 @@ def simple_parenting(model, accugrads, data):
 
                         if save_intermediate_model and successful_epochs % save_model_per_epoch == 0:
                             ctr_save_id +=1 ; save_id = ctr_save_id * 0.001
-                            resources.save_model(branch_prevStep[0], save_id)
-                            trainer.save_accugrads(branch_prevStep[1], save_id)
+                            save_checkpoint(branch_prevStep, save_id)
                             print(f'Data saved : Part {ctr_save_id}')
 
                         prevStep = branch_thisStep
@@ -172,7 +172,7 @@ def simple_parenting(model, accugrads, data):
 
 
 
-def advanced_parenting(model, accugrads, moments, data):
+def advanced_parenting(model, accugrads, moments, data, last_loss):
 
 
         # initial conditions
@@ -185,7 +185,7 @@ def advanced_parenting(model, accugrads, moments, data):
 
     checkpoints = []
 
-    prevStep = (model, accugrads, moments, loss_initial)
+    prevStep = (model, accugrads, moments, last_loss)
 
 
         # begin parenting
@@ -213,9 +213,7 @@ def advanced_parenting(model, accugrads, moments, data):
 
             if save_intermediate_model and successful_epochs % save_model_per_epoch == 0:
                 ctr_save_id +=1 ; save_id = ctr_save_id * 0.001
-                resources.save_model(prevStep[0], save_id)
-                trainer.save_accugrads(prevStep[1], save_id)
-                trainer.save_moments(prevStep[2], save_id)
+                save_checkpoint(prevStep, save_id)
                 print(f'Data saved : Part {ctr_save_id}')
 
             prevStep = thisStep
@@ -258,9 +256,7 @@ def advanced_parenting(model, accugrads, moments, data):
 
                         if save_intermediate_model and successful_epochs % save_model_per_epoch == 0:
                             ctr_save_id +=1 ; save_id = ctr_save_id * 0.001
-                            resources.save_model(branch_prevStep[0], save_id)
-                            trainer.save_accugrads(branch_prevStep[1], save_id)
-                            trainer.save_moments(branch_prevStep[2], save_id)
+                            save_checkpoint(branch_prevStep, save_id)
                             print(f'Data saved : Part {ctr_save_id}')
 
                         prevStep = branch_thisStep
@@ -283,6 +279,14 @@ def get_data(): return resources.load_data(data_path, data_size,really_random=re
 
 def get_clock(): return time.asctime(time.localtime(time.time())).split(' ')[3]
 
+def save_checkpoint(step, save_id):
+    for _,e in enumerate(step[:-1]):
+        if   _ == 0: resources.save_model(e, save_id)
+        elif _ == 1: trainer.save_accugrads(e, save_id)
+        elif _ == 2: trainer.save_moments(e, save_id)
+
+    resources.pickle_save(step[-1], 'last_loss.pkl')
+
 
 
 # parent runners
@@ -298,18 +302,21 @@ def run_simple_parenting(data):
         resources.save_model(model, '_before_simple')
 
     # initialize metadata
+    last_loss = resources.pickle_load('last_loss.pkl')
+    if last_loss is None: last_loss = loss_initial
     accugrads = trainer.load_accugrads(model)
 
     # get checkpoints
-    checkpoints = simple_parenting(model, accugrads, data)
+    checkpoints = simple_parenting(model, accugrads, data, last_loss)
+    save_checkpoint(checkpoints[-1], save_id=None)
 
-    # extract metadata
-    model = checkpoints[-1][0]
-    accugrads = checkpoints[-1][1]
-
-    # save metadata
-    resources.save_model(model)
-    trainer.save_accugrads(accugrads)
+    # # extract metadata
+    # model = checkpoints[-1][0]
+    # accugrads = checkpoints[-1][1]
+    #
+    # # save metadata
+    # resources.save_model(model)
+    # trainer.save_accugrads(accugrads)
 
 
 def run_advanced_parenting(data):
@@ -322,21 +329,24 @@ def run_advanced_parenting(data):
         resources.save_model(model, '_before_advanced')
 
     # initalize metadata
+    last_loss = resources.pickle_load('last_loss.pkl')
+    if last_loss is None: last_loss = loss_initial
     accugrads = trainer.load_accugrads(model)
     moments = trainer.load_moments(model)
 
     # get checkpoints
-    checkpoints = advanced_parenting(model, accugrads, moments, data)
+    checkpoints = advanced_parenting(model, accugrads, moments, data, last_loss)
+    save_checkpoint(checkpoints[-1], save_id=None)
 
-    # extract metadata
-    model = checkpoints[-1][0]
-    accugrads = checkpoints[-1][1]
-    moments = checkpoints[-1][2]
-
-    # save metadata
-    resources.save_model(model)
-    trainer.save_accugrads(accugrads)
-    trainer.save_moments(moments)
+    # # extract metadata
+    # model = checkpoints[-1][0]
+    # accugrads = checkpoints[-1][1]
+    # moments = checkpoints[-1][2]
+    #
+    # # save metadata
+    # resources.save_model(model)
+    # trainer.save_accugrads(accugrads)
+    # trainer.save_moments(moments)
 
 
 

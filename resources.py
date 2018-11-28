@@ -87,8 +87,10 @@ def pickle_save(obj, file_path):
         return pickle.dump(obj, MacOSFile(f), protocol=pickle.HIGHEST_PROTOCOL)
 
 def pickle_load(file_path):
-    with open(file_path, "rb") as f:
-        return pickle.load(MacOSFile(f))
+    try:
+        with open(file_path, "rb") as f:
+            return pickle.load(MacOSFile(f))
+    except: return None
 
 
 
@@ -123,13 +125,12 @@ def save_model(model, model_id=None, asText=False):
 
 def load_model(model_id=None):
     model_id = '' if model_id is None else str(model_id)
-    model = None
-    try:
-        model = pickle_load('model' + model_id + '.pkl')
+    model = pickle_load('model' + model_id + '.pkl')
+    if model is not None:
         print('> Model loaded.')
-    except:
+    else:
         print('> Model not found.')
-    finally: return model
+    return model
 
 
 
