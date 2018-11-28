@@ -21,7 +21,7 @@ def main():
             print(f'> {resources.get_datasize(parent.data_path)}')
         elif inp == '2':
             try: import music21
-            except: print('Music21 not found, use : pip3 install -Iv music21==5.0.1')
+            except: print('Music21 not found, use : pip3 install -Iv music21==5.1.0')
             finally: preproc.bootstrap()
         elif inp == '3':
             str = input('<datasize> <batchsize> <epochs>: ')
@@ -29,15 +29,13 @@ def main():
             parent.bootstrap(True, ep, ds, bs)
         elif inp == '4':
             try: import music21
-            except: print('Music21 not found, use : pip3 install -Iv music21==5.0.1')
+            except: print('Music21 not found, use : pip3 install -Iv music21==5.1.0')
             finally: interact_midi.bootstrap()
         elif inp == '5':
             # interact.bootstrap() # will come someday
             pass
         elif inp == 'debug':
-            try: import music21
-            except: print('Music21 not found, use : pip3 install -Iv music21==5.0.1')
-            finally: interact_debug.bootstrap()
+            interact_debug.bootstrap()
         elif inp == '20':
             if input('Removes trained model, continue? (y/n): ').lower() == 'y':
                 try: remove_training_data()
@@ -63,7 +61,8 @@ def display_options():
     print('---------')
 
 def clear_sc():
-    os.system("cls" if platform.system().lower() is "windows" else "clear")
+    print(platform.system())
+    os.system("cls" if platform.system().lower() == "windows" else "clear")
 
 def remove_training_data():
     import os.path
