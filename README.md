@@ -98,11 +98,12 @@ Have .pkl files ready at project dir
 
 
 
->(Extra) Training Options:
+(Extra) Training Options:
+
 
 >- startadv: 
 
->train with momentum based SGD 
+>train with momentum based sgd
 
 >default: startadv=False
 
@@ -114,7 +115,7 @@ Have .pkl files ready at project dir
 
 >default: lr2=0.01
 
->-drop: 
+>- drop: 
 
 >neurons randomly "drop" to generalize better
 
@@ -124,6 +125,6 @@ Have .pkl files ready at project dir
 
 >(not frequently used)
 
->seuqnetially execute sgd first, then momentum traing.
+>sequentially execute basic sgd first, then momentum traing.
 
->adv=False
+>default: adv=False
