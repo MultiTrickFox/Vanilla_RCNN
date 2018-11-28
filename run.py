@@ -67,13 +67,13 @@ def clear_sc():
 
 def remove_training_data():
     import os.path
-    to_remove = ['model.pkl',
-                 'model_accugrads.pkl',
-                 'model_moments.pkl',
-                 'last_loss.pkl']
+    from glob import glob
+    to_remove = ['last_loss.pkl']
+    to_remove.extend(glob('model*.pkl'))
+    to_remove.extend(glob('loss*.txt'))
     for e in to_remove:
         if os.path.exists(e):
-            os.remove('model.pkl')
+            os.remove(e)
 
 
 def remove_preprocess_data():
