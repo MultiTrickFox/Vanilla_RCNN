@@ -14,7 +14,7 @@ def main():
 
     while True:
         display_options()
-        inp = input('>input: ')
+        inp = input('> input: ')
         clear_sc()
 
         if inp == '1':
@@ -26,11 +26,34 @@ def main():
             except: print('Music21 not found, use : pip3 install -Iv music21==5.1.0')
         
         elif inp == '3':
+            
             arr = []
-            print('<datasize> <batchsize> <epochs>: ')
+            print('<datasize> <batchsize> <epochs>: ', end="")
             while (len(arr) < 3):
                 arr.extend(input().split(" "))
             ds, bs, ep = arr[:3]
+
+            params, args = [], []
+            while(True):
+                inp = input('optional args: (hit enter when done): ')
+                if inp == '':
+                    break
+                else:
+                    try:
+                        arr = inp.split("=")
+                        if (len(arr) == 2): 
+                            params.append(arr[0])
+                            args.append(arr[1])
+                    except Exception as e: print('weird input.', e)
+
+            for p,a in zip(params,args):
+                if p == 'lr1': parent.learning_rate_1 = float(a)
+                elif p == 'lr2': parent.learning_rate_2 = float(a)
+                elif p == 'startadv': parent.start_advanced = bool(a)
+                elif p == 'adv': parent.further_parenting = bool(a)
+                elif p == 'drop': parent.dropout = float(a)
+                else: print('Available params: lr1,lr2,startadv,adv,drop')
+
             parent.bootstrap(True, int(ep), int(ds), int(bs))
         
         elif inp == '4':

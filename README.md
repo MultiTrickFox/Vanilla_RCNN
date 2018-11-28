@@ -3,6 +3,11 @@ convolution on chord intervals
 
 is a from-scratch RCNN, using only pytorch's autograd
 
+>- convolutions to incoming chords is applied between fully connected gru layers, to come up with a "likely" chord response; while passing information to a gru-lstm stack for deciding details (i.e. pitch, velocity etc.)
+
+
+packages:
+
 >python version >= 3.6 is required: https://www.python.org/downloads/release/python-367/ and recommended launcher is IDLE (comes by default with python installation.)
 
 >(built on torch 0.4.0, provided @ (Mac OS X: pip3 install torch=0.4.0 & Windows: pip3 install 
@@ -20,7 +25,7 @@ http://download.pytorch.org/whl/cu90/torch-0.4.0-cp36-cp36m-win_amd64.whl - pyth
 Guide (simple):
 
 
-0- Make sure to install packets mentioned above.
+0- Make sure to install packages mentioned above.
 
 >guaranteed to run on OS X, while Windows is known to be memory-error prone.
 
@@ -81,7 +86,7 @@ Ctrl+C .pkl files into project dir
 
 >- Create /samples in project dir
 
->- Ctrl+C .mid files in /samples
+>- Ctrl+C .mid files into /samples
 
 >- Run.py -> Preprocess
 

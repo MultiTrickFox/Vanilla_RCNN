@@ -356,6 +356,20 @@ def bootstrap(custom=False,ep=None,ds=None,bs=None):
         global data_size   ; data_size    = ds
         global batch_size  ; batch_size   = bs
         global total_epochs; total_epochs = ep
+
+        # global learning_rate_1, learning_rate_2, advanced_parenting, further_parenting, dropout
+
+        # for e, eg in zip([lr1,lr2,advstart,further,drop], [learning_rate_1, learning_rate_2, advanced_parenting, further_parenting, dropout]):
+        #     if e is not None: 
+        #         try: eg = float(e)
+        #         except:
+        #             try: eg = bool(e)
+        #             except: pass
+
+        global advanced_parenting, further_parenting
+        if advanced_parenting is not None and further_parenting is not None:
+            if further_parenting: advanced_parenting = False
+                
         
 
     print(f'Data size  : {data_size}')
