@@ -11,8 +11,8 @@ def bootstrap():
         file = glob.glob("*.mid")[-1]
         print(f'Obtained file: {file}')
     except Exception as e:
-        print('Error : No .mid files found.',e)
-        file = None
+        print('Error : No .mid files found.')
+        file = input('Drag & Drop your midi here / enter path: ')
 
     try:
         if file is not None:
