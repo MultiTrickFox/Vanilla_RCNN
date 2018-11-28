@@ -136,31 +136,31 @@ def simple_parenting(model, accugrads, data, last_loss):
 
                 branch_thisStep = trainer.train_rms(prev_model, prev_accugrads, data) ; this_loss = branch_thisStep[-1]
 
-                if all(np.array(this_loss[0]) <= np.array(prev_loss[0])):
+                if all(np.array(this_loss[0]) < np.array(branch_goal[0])):
+
+                    checkpoints.append(branch_prevStep)
+
+                    successful_epochs +=(branch_ctr+2)
+
+                    print(f'@ {get_clock()} : '
+                          f'.  epoch {successful_epochs} / {total_epochs} completed. ')
+                    resources.write_loss(this_loss[0], as_txt=True, epoch_nr=successful_epochs)
+
+                    if reducing_batch_sizes and successful_epochs % reduce_batch_per_epoch == 0:
+                        trainer.batch_size = int(trainer.batch_size * reduce_ratio)
+
+                    if save_intermediate_model and successful_epochs % save_model_per_epoch == 0:
+                        ctr_save_id +=1 ; save_id = ctr_save_id * 0.001
+                        save_checkpoint(branch_prevStep, save_id)
+                        print(f'Data saved : Part {ctr_save_id}')
+
+                    prevStep = branch_thisStep
+
+                    break
+
+                if all(np.array(this_loss[0]) < np.array(prev_loss[0])):
 
                     branch_points.append(branch_prevStep)
-
-                    if all(np.array(this_loss[0]) <= np.array(branch_goal[0])):
-
-                        checkpoints.append(branch_prevStep)
-
-                        successful_epochs +=(branch_ctr+2)
-
-                        print(f'@ {get_clock()} : '
-                              f'.  epoch {successful_epochs} / {total_epochs} completed. ')
-                        resources.write_loss(this_loss[0], as_txt=True, epoch_nr=successful_epochs)
-
-                        if reducing_batch_sizes and successful_epochs % reduce_batch_per_epoch == 0:
-                            trainer.batch_size = int(trainer.batch_size * reduce_ratio)
-
-                        if save_intermediate_model and successful_epochs % save_model_per_epoch == 0:
-                            ctr_save_id +=1 ; save_id = ctr_save_id * 0.001
-                            save_checkpoint(branch_prevStep, save_id)
-                            print(f'Data saved : Part {ctr_save_id}')
-
-                        prevStep = branch_thisStep
-
-                        break
 
                     branch_prevStep = branch_thisStep
 
@@ -237,31 +237,31 @@ def advanced_parenting(model, accugrads, moments, data, last_loss):
 
                 branch_thisStep = trainer.train_rms(prev_model, prev_accugrads, prev_moments, data) ; this_loss = branch_thisStep[-1]
 
+                if all(np.array(this_loss[0]) < np.array(branch_goal[0])):
+
+                    checkpoints.append(branch_prevStep)
+
+                    successful_epochs +=(branch_ctr+2)
+
+                    print(f'@ {get_clock()} : '
+                          f'.  epoch {successful_epochs} / {total_epochs} completed. ')
+                    resources.write_loss(this_loss[0], as_txt=True, epoch_nr=successful_epochs)
+
+                    if reducing_batch_sizes and successful_epochs % reduce_batch_per_epoch == 0:
+                        trainer.batch_size = int(trainer.batch_size * 4/5)
+
+                    if save_intermediate_model and successful_epochs % save_model_per_epoch == 0:
+                        ctr_save_id +=1 ; save_id = ctr_save_id * 0.001
+                        save_checkpoint(branch_prevStep, save_id)
+                        print(f'Data saved : Part {ctr_save_id}')
+
+                    prevStep = branch_thisStep
+
+                    break
+
                 if all(np.array(this_loss[0]) < np.array(prev_loss[0])):
 
                     branch_points.append(branch_prevStep)
-
-                    if all(np.array(this_loss[0]) < np.array(branch_goal[0])):
-
-                        checkpoints.append(branch_prevStep)
-
-                        successful_epochs +=(branch_ctr+2)
-
-                        print(f'@ {get_clock()} : '
-                              f'.  epoch {successful_epochs} / {total_epochs} completed. ')
-                        resources.write_loss(this_loss[0], as_txt=True, epoch_nr=successful_epochs)
-
-                        if reducing_batch_sizes and successful_epochs % reduce_batch_per_epoch == 0:
-                            trainer.batch_size = int(trainer.batch_size * 4/5)
-
-                        if save_intermediate_model and successful_epochs % save_model_per_epoch == 0:
-                            ctr_save_id +=1 ; save_id = ctr_save_id * 0.001
-                            save_checkpoint(branch_prevStep, save_id)
-                            print(f'Data saved : Part {ctr_save_id}')
-
-                        prevStep = branch_thisStep
-
-                        break
 
                     branch_prevStep = branch_thisStep
 
