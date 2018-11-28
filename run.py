@@ -34,16 +34,25 @@ def main():
         elif inp == '5':
             # interact.bootstrap() # will come someday
             pass
-        elif inp == 'debug':
+
+        elif inp == 'manual':
             interact_debug.bootstrap()
-        elif inp == '20':
-            if input('Removes trained model, continue? (y/n): ').lower() == 'y':
+
+        elif inp == 'debug':
+            display_debug_options()
+            inp = input('>debug-input: ')
+            clear_sc()
+
+            if inp == '1' and input('Removes trained model, continue? (y/n): ').lower() == 'y':
                 try: remove_training_data()
                 except Exception as e: print('Remove error: ', e)
-        elif inp == '21':
-            if input('Removes .pkl data, continue? (y/n): ').lower() == 'y':
+
+            
+            elif inp == '2' and input('Removes .pkl data, continue? (y/n): ').lower() == 'y':
                 try: remove_preprocess_data()
                 except Exception as e: print('Remove error: ', e)
+
+            else: pass
 
         elif inp == '0': break
         else: pass
@@ -58,6 +67,17 @@ def display_options():
     print('4- Midi response')
     print('5- Interact')
     print('0- ')
+    print('---------')
+
+def display_debug_options():
+
+    print('\n \t\t Debug Menu: \n')
+    print('1- Remove model. ')
+    print('2- Remove data pickles.')
+    print('0- Return')
+    # print('4- Midi response')
+    # print('5- Interact')
+    # print('0- ')
     print('---------')
 
 def clear_sc():

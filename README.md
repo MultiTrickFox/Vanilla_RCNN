@@ -48,6 +48,9 @@ Musescore interaction:
 
 Delete the provided model.pkl
 
+>- run.py -> debug (brings up debug menu)
+
+
 Custom dataset available on:
 >https://www.floydhub.com/developersfox/datasets/jazz_piano
 
