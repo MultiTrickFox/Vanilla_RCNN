@@ -34,38 +34,61 @@ Responding to midi
 >- copy .mid file into project dir
 
 
->- run.py -> midi response
+>- Run.py -> Midi Response
 
 
 Musescore interaction: 
 
->- I/O via MuseScore. ( Requires : https://musescore.org/en. )
+>- ( Requires : https://musescore.org/en. )
 
->- run.py -> interact
+>- Run.py -> Interact
+
+>- I/O via MuseScore.
 
 
 2- (Optional) Start from scratch:
 
+Running on Windows
+
+>- IDLE will be enough.
+
+
+Running on OS X
+
+>- IDLE can only handle interaction modes and known to crash during training. 
+
+>- Recommend switching to PyCharm ( https://www.jetbrains.com/pycharm/download/ )
+
+
+
 Delete the provided model.pkl
 
->- run.py -> debug (brings up debug menu)
+>- Manually from project dir
+
+>- Or, run.py -> debug (brings up debug menu)
 
 
 Custom dataset available on:
 >https://www.floydhub.com/developersfox/datasets/jazz_piano
 
+
 Ctrl+C .pkl files into project dir
 
+>.pkls are preprocessed .mid files
 
 
+(Optional) For training on your own .mid files:
 
-(Optional) for training on custom .mid files, paste as projectdir/samples/your_file.mid
+>- Create Folder /samples in project dir
 
->- (Optional) run.py -> preprocess
+>- Ctrl+C .mid files under /samples
+
+>- Run.py -> Preprocess
+
 
 
 Have .pkl files ready at project dir
 
->- run.py -> training
+>- Run.py -> Training
 
 
