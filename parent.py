@@ -29,8 +29,8 @@ layers = (10, 8, 12)
     # data details
 
 data_path = "sample*.pkl"
-data_size = 10 # 30_000
-batch_size = 10 # 400
+data_size = 30_000
+batch_size = 400
 
 
     # training details
