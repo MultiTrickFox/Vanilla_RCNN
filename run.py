@@ -39,20 +39,23 @@ def main():
             interact_debug.bootstrap()
 
         elif inp == 'debug':
+            # clear_sc()
             display_debug_options()
-            inp = input('>debug-input: ')
-            clear_sc()
 
-            if inp == '1' and input('Removes trained model, continue? (y/n): ').lower() == 'y':
-                try: remove_training_data()
-                except Exception as e: print('Remove error: ', e)
+            while(True):
 
-            
-            elif inp == '2' and input('Removes .pkl data, continue? (y/n): ').lower() == 'y':
-                try: remove_preprocess_data()
-                except Exception as e: print('Remove error: ', e)
+                inp = input('>debug-input: ')
 
-            else: pass
+                if inp == '1' and input('Removes trained model, continue? (y/n): ').lower() == 'y':
+                    try: remove_training_data()
+                    except Exception as e: print('Remove error: ', e)
+
+                
+                elif inp == '2' and input('Removes .pkl data, continue? (y/n): ').lower() == 'y':
+                    try: remove_preprocess_data()
+                    except Exception as e: print('Remove error: ', e)
+
+                else: break
 
         elif inp == '0': break
         else: pass
@@ -93,7 +96,7 @@ def remove_training_data():
     for e in to_remove:
         if os.path.exists(e):
             os.remove(e)
-
+            print(f'removed {e}.')
 
 def remove_preprocess_data():
     import os
@@ -101,6 +104,10 @@ def remove_preprocess_data():
     to_remove = glob('sample*.pkl')
     for e in to_remove:
         os.remove(e)
+        print(f'removed {e}.')
+
+
+
 
 
 if __name__ == '__main__':main()
