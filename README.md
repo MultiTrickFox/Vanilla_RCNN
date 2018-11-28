@@ -3,12 +3,12 @@ convolution on chord intervals
 
 is a from-scratch RCNN, using only pytorch's autograd
 
->- convolutions to incoming chords is applied between fully connected gru layers, to come up with a "likely" chord response; while passing information to a gru-lstm stack for deciding details (i.e. pitch, velocity etc.)
+>- between fully connected gru layers, convolutions with incoming chords to come up with a "likely" chord response; while passing information to a gru-lstm stack for deciding details (i.e. pitch, velocity etc.)
 
 
-packages:
+requirements:
 
->python version >= 3.6 is required: https://www.python.org/downloads/release/python-367/ and recommended launcher is IDLE (comes by default with python installation.)
+>python version >= 3.6: https://www.python.org/downloads/release/python-367/ and recommended launcher is IDLE (comes by default with python installation.)
 
 >(built on torch 0.4.0, provided @ (Mac OS X: pip3 install torch=0.4.0 & Windows: pip3 install 
 http://download.pytorch.org/whl/cu90/torch-0.4.0-cp36-cp36m-win_amd64.whl - python3.6 version only.)
@@ -33,7 +33,7 @@ Guide (simple):
 1- Using provided model:
 
 
-Responding to midi
+Responding to Midi Files
 
 
 >- copy .mid file into project dir
@@ -42,7 +42,7 @@ Responding to midi
 >- Run.py -> Midi Response
 
 
-Musescore interaction 
+MuseScore Interaction 
 
 >- ( requires : https://musescore.org/en. )
 
@@ -97,3 +97,33 @@ Have .pkl files ready at project dir
 >- Run.py -> Training
 
 
+
+>(Extra) Training Options:
+
+>- startadv: 
+
+>train with momentum based SGD 
+
+>default: startadv=False
+
+>- lr1, lr2: 
+
+>learning rates for sgd and momentum modes
+
+>default: lr1=0.001
+
+>default: lr2=0.01
+
+>-drop: 
+
+>neurons randomly "drop" to generalize better
+
+>default: drop=0.1
+
+>- adv
+
+>(not frequently used)
+
+>seuqnetially execute sgd first, then momentum traing.
+
+>adv=False
