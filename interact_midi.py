@@ -12,7 +12,7 @@ def bootstrap():
         print(f'Obtained file: {file}')
     except Exception as e:
         print('Error : No .mid files found.')
-        file = input('Drag & Drop your midi here / enter path: ')
+        file = input('Drag & Drop your midi here / enter path: \n')
 
     try:
         if file is not None:

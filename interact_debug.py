@@ -11,6 +11,8 @@ max_volume = preproc.MAX_VOLUME
 
 pick_thr = (1-0.3)
 
+write_response = True
+
 
 
 def bootstrap(input_sequence=None):
@@ -40,14 +42,20 @@ def bootstrap(input_sequence=None):
 
         converted_response = [conv(out_t) for out_t in response]
 
-        for resp_conv, resp_act in zip(converted_response, response):
+        with open('responses.txt','a+')as file:
 
-            print('---')
-            print(' Notes:', resp_conv[0], resp_act[0])
-            print(' Octaves:', resp_conv[1], resp_act[1])
-            print(' Durations:', resp_conv[2], resp_act[2])
-            print(' Velocities:', resp_conv[3], resp_act[3])
-            print('---')
+            for resp_conv, resp_act in zip(converted_response, response):
+
+                print('---')
+                print(' Notes:', resp_conv[0], resp_act[0])
+                print(' Octaves:', resp_conv[1], resp_act[1])
+                print(' Durations:', resp_conv[2], resp_act[2])
+                print(' Velocities:', resp_conv[3], resp_act[3])
+                print('---')
+                
+                for e in resp_act:
+                    file.write(str(e.detach().numpy())+' \n')
+                file.write('\n')
 
         print(f'Response length: {len(converted_response)}')
 
@@ -58,12 +66,15 @@ def bootstrap(input_sequence=None):
         response = Vanilla.forward_prop(model, sequence)
         converted_response = [conv(out_t) for out_t in response]
 
+        if write_response: [write_response_txt(t) for t in response]
+
     return converted_response
     
 
 
 
 # helper-converters
+
 
 
 def ai_2_human(out_t, chord_mode=True, pick_thr=pick_thr):
@@ -125,6 +136,14 @@ def human_2_ai(data):
 
 
 # other helpers
+
+
+def write_response_txt(response_t):
+    with open('responses.txt',"a+") as file:
+        for e in response_t:
+            file.write(str(e.detach().numpy()) + ' \n')
+        file.write('\n')
+
 
 
 def get_user_input(inp_len):

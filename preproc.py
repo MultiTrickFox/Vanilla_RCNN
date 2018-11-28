@@ -196,7 +196,7 @@ def vectorize_element(element):
 def midi_to_stream(raw_file):
     imported_file = import_file(raw_file)
     if imported_file is not None:
-        return convert_file(imported_file)
+        return convert_file(imported_file)[:max_phrase_len*5]
     return []
 
 
