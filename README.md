@@ -3,7 +3,15 @@ convolution on chord intervals
 
 is a from-scratch RCNN, using only pytorch's autograd
 
->- between fully connected gru layers, convolutions with incoming chords to come up with a "likely" chord response; while passing information to a gru-lstm stack for deciding details (i.e. pitch, velocity etc.)
+> What does it do: 
+
+>- uses midi information (or direct i/o) as a template to generate a "sequence of sounds"
+
+>- has chord and solo modes for deciding this generative content accordingly
+
+> How does it work: 
+
+>- convolutions applied to incoming chords, between fully connected gru layers, to come up with a "likely" chord response; while passing information to a sub network of gru-gru-lstm stack for deciding details (i.e. pitch, velocity etc.)
 
 
 requirements:
