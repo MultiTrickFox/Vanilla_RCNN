@@ -4,13 +4,17 @@ import parent
 import interact_debug
 import interact_midi
 
-import os
+import sys, os
 import platform
+
 
 
 
 def main():
 
+    currdir = os.path.dirname(sys.argv[0])
+    os.chdir(os.path.abspath(currdir))
+    clear_sc()
 
     while True:
         display_options()
@@ -85,6 +89,9 @@ def main():
 
         elif inp == '0': break
         else: pass
+
+        input('Hit any key to continue..')
+        clear_sc()
 
 
 def display_options():

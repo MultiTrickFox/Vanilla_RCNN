@@ -2,6 +2,7 @@ import interact_debug
 import preproc
 
 import glob
+import os
 
 
 def bootstrap():
@@ -13,6 +14,7 @@ def bootstrap():
     except Exception as e:
         print('Error : No .mid files found.')
         file = None
+        # file = os.path.abspath(input('Drag & Drop midi file: '))
 
     try:
         if file is not None:
@@ -20,11 +22,12 @@ def bootstrap():
             data = preproc.midi_to_stream(file)
         else: data = None
     except Exception as e:
-        data = None
-        print('Error : Provided file could not be processed.',e)
+        data = []
+        print('Error : Provided midi cannot be processed.',e)
 
     try:
-        if data is not None:
+        if len(data) > 0:
+            
             print('Asking ai..')
             response = interact_debug.bootstrap(data)
 
@@ -33,7 +36,8 @@ def bootstrap():
                 for stuff in resp_step:
                     print(stuff)
                 print("-----")
-    except Exception as e: print('Error : No response could be generated for given file.',e)
+        else: print('Error : No midi information was extracted.')
+    except Exception as e: print('Error : No response could be generated.',e)
 
 
 if __name__ == '__main__':
