@@ -207,7 +207,7 @@ def bootstrap():
     hm_files = len(raw_files)
     data_size = 0
 
-    print(f'Detected {hm_files} files.')
+    print(f'Found {hm_files} files.')
     if hm_files != 0:
         batch_len = int(hm_files / hm_batches)
 
@@ -223,7 +223,7 @@ def bootstrap():
         print(f'Total of {data_size} samples saved.')
         return data_size
     else:
-        print('Import Error : Copy .midis under /samples')
+        print('Error : no .midi detected in /samples')
 
 
 

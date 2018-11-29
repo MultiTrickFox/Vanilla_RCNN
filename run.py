@@ -38,6 +38,7 @@ def main():
             while(True):
                 inp = input('optional args: (hit enter when done): ')
                 if inp == '':
+                    print()
                     break
                 else:
                     try:

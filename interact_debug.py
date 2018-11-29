@@ -142,7 +142,7 @@ def write_response_txt(response_t):
     with open('responses.txt',"a+") as file:
         for e in response_t:
             file.write(str(e.detach().numpy()) + ' \n')
-        file.write('\n')
+        file.write('\n') 
 
 
 
