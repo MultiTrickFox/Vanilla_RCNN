@@ -140,9 +140,11 @@ def human_2_ai(data):
 
 def write_response_txt(response_t):
     with open('responses.txt',"a+") as file:
-        for e in response_t:
-            file.write(str(e.detach().numpy()) + ' \n')
-        file.write('\n') 
+        for result_element in response_t:
+            result_element = "".join([str(float(e))+"," for e in result_element])
+            file.write(result_element+";")
+        file.write('\n')
+            # file.write(e.detach().numpy())
 
 
 
