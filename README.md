@@ -16,7 +16,7 @@ is a from-scratch RCNN, using only pytorch's autograd
 
 requirements:
 
->python version >= 3.6: https://www.python.org/downloads/release/python-367/ and recommended launcher is IDLE (comes by default with python installation.)
+>python version >= 3.6: https://www.python.org/downloads/release/python-367/ and recommended running method is terminal -> "python3 run.py"
 
 >(built on torch 0.4.0, provided @ (Mac OS X: pip3 install torch=0.4.0 & Windows: pip3 install 
 http://download.pytorch.org/whl/cu90/torch-0.4.0-cp36-cp36m-win_amd64.whl - python3.6 version only.)
@@ -60,17 +60,6 @@ MuseScore Interaction
 
 
 2- (Optional) Start from scratch:
-
-Running on Windows
-
->- IDLE will be enough.
-
-
-Running on OS X
-
->- IDLE can only handle interaction modes and known to crash during training. 
-
->- Recommend switching to PyCharm ( https://www.jetbrains.com/pycharm/download/ )
 
 
 
