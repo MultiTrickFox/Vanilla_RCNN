@@ -7,6 +7,7 @@ import interact_midi
 import sys, os
 import platform
 
+from glob import glob
 
 
 
@@ -29,24 +30,27 @@ def main():
         elif inp == '3':
             
             arr = []
-            print('<datasize> <batchsize> <epochs>: ', end="")
+            print('> datasize batchsize epochs :')
             while (len(arr) < 3):
                 arr.extend(input().split(" "))
             ds, bs, ep = arr[:3]
 
             params, args = [], []
+            print('> optional args: (hit enter when done) ')
             while(True):
-                inp = input('optional args: (hit enter when done): ')
+                inp = input()
                 if inp == '':
-                    print()
                     break
                 else:
                     try:
-                        arr = inp.split("=")
-                        if (len(arr) == 2): 
-                            params.append(arr[0])
-                            args.append(arr[1])
-                    except Exception as e: print('weird input.', e)
+                        stuff = inp.split(" ")
+                        for s in stuff:
+                            arr = s.split("=")
+                            if (len(arr) == 2): 
+                                params.append(arr[0])
+                                args.append(arr[1])
+                            else: print("correct format: param1=arg1 param2=arg2 ..")
+                    except Exception as e: print("correct format: param1=arg1 param2=arg2 ..")
 
             for p,a in zip(params,args):
                 if p == 'lr1': parent.learning_rate_1 = float(a)
@@ -56,7 +60,10 @@ def main():
                 elif p == 'drop': parent.dropout = float(a)
                 else: print('Available params: lr1,lr2,startadv,adv,drop')
 
+            clear_sc();
+
             parent.bootstrap(True, int(ep), int(ds), int(bs))
+                    
         
         elif inp == '4':
             interact_midi.bootstrap()
@@ -77,14 +84,20 @@ def main():
                 inp = input('>debug-input: ')
                 clear_sc()
 
-                if inp == '1' and input('Removes trained model, continue? (y/n): ').lower() == 'y':
-                    try: remove_training_data()
+                if inp == '1' and input('Removes intermediate data, continue? (y/n): ').lower() == 'y':
+                    try: remove_intermediate_data()
                     except Exception as e: print('Remove error: ', e)
 
                 
                 elif inp == '2' and input('Removes .pkl data, continue? (y/n): ').lower() == 'y':
                     try: remove_preprocess_data()
                     except Exception as e: print('Remove error: ', e)
+
+
+                if inp == '3' and input('Removes trained model, continue? (y/n): ').lower() == 'y':
+                    try: remove_training_data()
+                    except Exception as e: print('Remove error: ', e)
+
 
                 else: break
 
@@ -109,8 +122,10 @@ def display_options():
 def display_debug_options():
 
     print('\n \t\t Debug Menu: \n')
-    print('1- Remove model. ')
-    print('2- Remove data pickles.')
+    print('1- Remove intermediate data.')
+    print('2- Remove data .pkls')
+    print('3- Remove model. ')
+    
     print('0- Return')
     # print('4- Midi response')
     # print('5- Interact')
@@ -122,7 +137,6 @@ def clear_sc():
 
 def remove_training_data():
     import os.path
-    from glob import glob
     to_remove = ['last_loss.pkl']
     to_remove.extend(glob('model*.pkl'))
     to_remove.extend(glob('loss*.txt'))
@@ -132,12 +146,17 @@ def remove_training_data():
             print(f'removed {e}.')
 
 def remove_preprocess_data():
-    import os
-    from glob import glob
     to_remove = glob('sample*.pkl')
     for e in to_remove:
         os.remove(e)
         print(f'removed {e}.')
+
+def remove_intermediate_data():
+    for thing in ['model*pkl','model_accugrads*.pkl','model_moments*.pkl','loss*.txt','meta*.pkl']:
+        things = glob(thing)
+        for it in things:
+            if it != "model.pkl" and it != "model_accugrads.pkl" and it != "model_moments" and it != "meta.pkl":
+                os.remove(it) ; print(f'Removed {it}.')    
 
 
 

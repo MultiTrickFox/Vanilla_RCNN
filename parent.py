@@ -279,13 +279,14 @@ def get_data(): return resources.load_data(data_path, data_size,really_random=re
 
 def get_clock(): return time.asctime(time.localtime(time.time())).split(' ')[3]
 
-def save_checkpoint(step, save_id):
+def save_checkpoint(step, save_id=None):
     for _,e in enumerate(step[:-1]):
         if   _ == 0: resources.save_model(e, save_id)
         elif _ == 1: trainer.save_accugrads(e, save_id)
         elif _ == 2: trainer.save_moments(e, save_id)
 
-    resources.pickle_save(step[-1], 'last_loss.pkl')
+    save_id = "" if save_id is not None else str(save_id)
+    resources.pickle_save(step[-1], 'meta'+save_id+'.pkl')
 
 
 

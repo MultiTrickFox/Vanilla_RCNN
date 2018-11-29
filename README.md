@@ -3,30 +3,41 @@ convolution on chord intervals
 
 is a from-scratch RCNN, using only pytorch's autograd
 
-> What does it do: 
+> What does it do:
 
 >- uses midi information (or direct i/o) as a template to generate a "sequence of sounds"
 
 >- has chord and solo modes for deciding this generative content accordingly
 
-> How does it work: 
+> How does it work:
 
 >- convolutions on incoming chords, between fully connected gru layers, to come up with a "likely" chord response; while passing information to a sub network of gru-gru-lstm stack for deciding details (i.e. pitch, velocity etc.)
 
 
 requirements:
 
->python version >= 3.6: https://www.python.org/downloads/release/python-367/ and recommended running method is terminal -> "python3 run.py"
+>python version >= 3.6: https://www.python.org/downloads/release/python-367/
 
->(built on torch 0.4.0, provided @ (Mac OS X: pip3 install torch=0.4.0 & Windows: pip3 install 
+>(built on torch 0.4.0, provided @ (Mac OS X: pip3 install torch=0.4.0 & Windows: pip3 install
 http://download.pytorch.org/whl/cu90/torch-0.4.0-cp36-cp36m-win_amd64.whl - python3.6 version only.)
 
->also music21 v5.1.0 is required for preprocess 
+>also music21 v5.1.0 is required for preprocess
 & interaction purposes @
 (pip3 install music21==5.1.0
 
 
 >Notice : same versions mentioned above are required & else is known to have bugs.
+
+
+how to run:
+
+>- OS X:
+
+> terminal -> python3 <drag & drop run.py> -> hit enter
+
+>- Windows:
+
+> double click run.bat
 
 
 
@@ -35,7 +46,7 @@ Guide (simple):
 
 0- Make sure to install packages mentioned above.
 
->guaranteed to run on OS X, while Windows is known to be memory-error prone.
+> guaranteed to run on OS X, while Windows is known to be memory-error prone.
 
 
 1- Using provided model:
@@ -50,7 +61,7 @@ Responding to Midi Files
 >- Run.py -> Midi Response
 
 
-MuseScore Interaction 
+MuseScore Interaction
 
 >- ( requires : https://musescore.org/en. )
 
@@ -98,21 +109,21 @@ Have .pkl files ready at project dir
 (Extra) Training Options:
 
 
->- startadv: 
+>- startadv:
 
->train with momentum based sgd
+>improve optimizer with adaptive momentum
 
 >default: startadv=False
 
->- lr1, lr2: 
+>- lr1, lr2:
 
->learning rates for sgd and momentum modes
+>learning rates for two modes respectively
 
 >default: lr1=0.001
 
 >default: lr2=0.01
 
->- drop: 
+>- drop:
 
 >neurons randomly "drop" to generalize better
 
@@ -122,6 +133,6 @@ Have .pkl files ready at project dir
 
 >(not frequently used)
 
->sequentially execute basic sgd first, then momentum traing.
+>basic and improved sgd are run on same dataset, sequentially, no shuffle occurs. (where each training run causes a dataset shuffle, for better generalization.)
 
 >default: adv=False
