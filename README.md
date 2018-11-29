@@ -23,7 +23,7 @@ http://download.pytorch.org/whl/cu90/torch-0.4.0-cp36-cp36m-win_amd64.whl - pyth
 
 >also music21 v5.1.0 is required for preprocess 
 & interaction purposes @
-(pip3 install -Iv music21==5.1.0
+(pip3 install music21==5.1.0
 
 
 >Notice : same versions mentioned above are required & else is known to have bugs.
