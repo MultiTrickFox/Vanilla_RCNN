@@ -5,11 +5,11 @@ is a from-scratch RCNN, using only pytorch's autograd
 
 > What does it do:
 
->- uses midi information (or direct i/o) as a template to generate a "sequence of sounds"
+>- parses midi information (or direct i/o) as a template to generate a "sequence of sounds"
 
->- has chord and solo modes for deciding this generative content accordingly
+>- has chord and solo modes for generating content accordingly
 
-> How does it work:
+> How does it do:
 
 >- convolutions on incoming chords, between fully connected gru layers, to come up with a "likely" chord response; while passing information to a sub network of gru-gru-lstm stack for deciding details (i.e. pitch, velocity etc.)
 
@@ -18,7 +18,7 @@ requirements:
 
 >python version >= 3.6: https://www.python.org/downloads/release/python-367/
 
->(built on torch 0.4.0, provided @ (Mac OS X: pip3 install torch=0.4.0 & Windows: pip3 install
+>built on torch 0.4.0, provided @ (Mac OS X: pip3 install torch=0.4.0 & Windows: pip3 install
 http://download.pytorch.org/whl/cu90/torch-0.4.0-cp36-cp36m-win_amd64.whl - python3.6 version only.)
 
 >also music21 v5.1.0 is required for preprocess
@@ -37,7 +37,7 @@ how to run:
 
 >- Windows:
 
-> double click run.bat
+> double click Runner
 
 
 
@@ -45,8 +45,6 @@ Guide (simple):
 
 
 0- Make sure to install packages mentioned above.
-
-> guaranteed to run on OS X, while Windows is known to be memory-error prone.
 
 
 1- Using provided model:
@@ -111,7 +109,7 @@ Have .pkl files ready at project dir
 
 >- startadv:
 
->improve optimizer with adaptive momentum
+>run training using adaptive momentum
 
 >default: startadv=False
 
@@ -129,10 +127,16 @@ Have .pkl files ready at project dir
 
 >default: drop=0.1
 
+>- onlyloss:
+
+>model trained on only a single dimension of output
+
+>default: onlyloss=None
+
 >- adv
 
 >(not frequently used)
 
->basic and improved sgd are run on same dataset, sequentially, no shuffle occurs. (where each training run causes a dataset shuffle, for better generalization.)
+>both modes of sgd are run on same dataset, sequentially, no shuffle occurs. (where each separate training run causes a dataset shuffle, for better generalization.)
 
 >default: adv=False

@@ -183,17 +183,16 @@ def tensorify_sequence(sequence):
 # others
 
 
-def plot_loss_txts(hm_mins_refresh=2):
+def plot_loss_txts(which_loss=None, hm_mins_refresh=2):
     from matplotlib import style
     import matplotlib.pyplot as plot
     import matplotlib.animation as animation
     # import matplotlib.patches as mpatches
     import random
 
-    loss_1_path = 'loss_1.txt'  # input('import loss_1: ')
-    loss_2_path = 'loss_2.txt'  # input('import loss_2: ')
-    loss_3_path = 'loss_3.txt'  # input('import loss_3: ')
-    loss_4_path = 'loss_4.txt'  # input('import loss_4: ')
+    loss_paths = ['loss_1.txt', 'loss_2.txt', 'loss_3.txt', 'loss_4.txt']
+
+    file_paths = [loss_paths[which_loss-1]] if which_loss is not None else loss_paths
 
     fig = plot.figure()
     axis = fig.add_subplot(1, 1, 1)
@@ -204,42 +203,24 @@ def plot_loss_txts(hm_mins_refresh=2):
     def animate(i):
         epochs, losses = [], []
 
-        with open(loss_1_path, 'r') as f:
-            for line in f.readlines():
-                epoch, loss = line.split(',')
-                loss = float(loss[:-1])
-                if loss != 999999999:
-                    epochs.append(int(epoch))
-                    losses.append(int(loss))
-
-        with open(loss_2_path, 'r') as f:
-            for line in f.readlines():
-                epoch, loss = line.split(',')
-                loss = float(loss[:-1])
-                if loss != 999999999:
-                    losses.append(int(loss))
-
-        with open(loss_3_path, 'r') as f:
-            for line in f.readlines():
-                epoch, loss = line.split(',')
-                loss = float(loss[:-1])
-                if loss != 999999999:
-                    losses.append(int(loss))
-
-        with open(loss_4_path, 'r') as f:
-            for line in f.readlines():
-                epoch, loss = line.split(',')
-                loss = float(loss[:-1])
-                if loss != 999999999:
-                    losses.append(int(loss))
+        for file_path in file_paths:
+            try:
+                with open(file_path, 'r') as f:
+                    for line in f.readlines():
+                        epoch, loss = line.split(',')
+                        loss = float(loss[:-1])
+                        if loss != 999999999:
+                            epochs.append(int(epoch))
+                            losses.append(int(loss))
+            except: pass
 
         axis.clear()
-        axis.plot(epochs, losses[:len(epochs)], 'r', label='Vocabulary')
-        axis.plot(epochs, losses[len(epochs) * 2: len(epochs) * 3], 'b', label='Rhythm')
-        axis.plot(epochs, losses[len(epochs):len(epochs) * 2], 'g', label='Octaves')
-        axis.plot(epochs, losses[len(epochs) * 3: len(epochs) * 4], 'y', label='Velocities')
-
-        plot.legend(bbox_to_anchor=(1.1, 1.1), loc=1, borderaxespad=0.)
+        axis.plot(epochs, losses[:len(epochs)], 'r')
+        try:
+            axis.plot(epochs, losses[len(epochs) * 2: len(epochs) * 3], 'g')
+            axis.plot(epochs, losses[len(epochs):len(epochs) * 2], 'b')
+            axis.plot(epochs, losses[len(epochs) * 3: len(epochs) * 4], 'y')
+        except: pass
 
     ani = animation.FuncAnimation(fig, animate, hm_mins_refresh)
     var = plot.gcf()
@@ -248,12 +229,16 @@ def plot_loss_txts(hm_mins_refresh=2):
     plot.show()
 
 
+def graph_bootstrap():
+    plot_loss_txts(int(input('> loss number to display : ')))
+
+
 
 
 
 if __name__ == '__main__':
     print(get_datasize("samples_*.pkl"))
-    plot_loss_txts()
+    # plot_loss_txts()
 
 
 

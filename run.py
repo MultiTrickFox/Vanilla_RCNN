@@ -24,16 +24,21 @@ def main():
 
         if inp == '1':
             print(f'> {resources.get_datasize(parent.data_path)}')
+            
         elif inp == '2':
             preproc.bootstrap()
 
         elif inp == '3':
+
+            # inp essential args
             
             arr = []
             print('> datasize batchsize epochs :')
             while (len(arr) < 3):
                 arr.extend(input().split(" "))
             ds, bs, ep = arr[:3]
+
+            # inp optional args
 
             params, args = [], []
             print('> optional args: (hit enter when done) ')
@@ -52,13 +57,16 @@ def main():
                             else: print("correct format: param1=arg1 param2=arg2 ..")
                     except Exception as e: print("correct format: param1=arg1 param2=arg2 ..")
 
+            # connections to parent
+
             for p,a in zip(params,args):
                 if p == 'lr1': parent.learning_rate_1 = float(a)
                 elif p == 'lr2': parent.learning_rate_2 = float(a)
                 elif p == 'startadv': parent.start_advanced = bool(a)
                 elif p == 'adv': parent.further_parenting = bool(a)
                 elif p == 'drop': parent.dropout = float(a)
-                else: print('Available params: lr1,lr2,startadv,adv,drop')
+                elif p == 'onlyloss': parent.only_loss_on = int(a)
+                else: print('Available params: lr1,lr2,startadv,adv,drop,onlyloss')
 
             clear_sc();
 
@@ -72,6 +80,9 @@ def main():
             # interact.bootstrap() # will come someday
             pass
 
+        elif inp == 'graph':
+            resources.graph_bootstrap()
+
         elif inp == 'manual':
             interact_debug.bootstrap()
 
@@ -84,19 +95,31 @@ def main():
                 inp = input('>debug-input: ')
                 clear_sc()
 
-                if inp == '1' and input('Removes intermediate data, continue? (y/n): ').lower() == 'y':
-                    try: remove_intermediate_data()
-                    except Exception as e: print('Remove error: ', e)
+                if inp == '1':
+                    try:
+                        restore_from_checkpoint()
+                        print('done.')
+                    except Exception as e: print('Op error: ', e)
+
+                elif inp == '2' and input('Removes intermediate data, continue? (y/n): ').lower() == 'y':
+                    try:
+                        remove_intermediate_data()
+                        print('done.')
+                    except Exception as e: print('Op error: ', e)
 
                 
-                elif inp == '2' and input('Removes .pkl data, continue? (y/n): ').lower() == 'y':
-                    try: remove_preprocess_data()
-                    except Exception as e: print('Remove error: ', e)
+                elif inp == '3' and input('Removes .pkl data, continue? (y/n): ').lower() == 'y':
+                    try:
+                        remove_preprocess_data()
+                        print('done.')
+                    except Exception as e: print('Op error: ', e)
 
 
-                if inp == '3' and input('Removes trained model, continue? (y/n): ').lower() == 'y':
-                    try: remove_training_data()
-                    except Exception as e: print('Remove error: ', e)
+                if inp == '4' and input('Removes trained model, continue? (y/n): ').lower() == 'y':
+                    try:
+                        remove_training_data()
+                        print('done.')
+                    except Exception as e: print('Op error: ', e)
 
 
                 else: break
@@ -104,7 +127,7 @@ def main():
         elif inp == '0': break
         else: pass
 
-        input('Hit any key to continue..')
+        input('\n Hit any key to continue..')
         clear_sc()
 
 
@@ -122,9 +145,10 @@ def display_options():
 def display_debug_options():
 
     print('\n \t\t Debug Menu: \n')
-    print('1- Remove intermediate data.')
-    print('2- Remove data .pkls')
-    print('3- Remove model. ')
+    print('1- Restore from checkpoint.')
+    print('2- Remove checkpoint data.')
+    print('3- Remove data .pkls')
+    print('4- Remove model. ')
     
     print('0- Return')
     # print('4- Midi response')
@@ -135,11 +159,41 @@ def display_debug_options():
 def clear_sc():
     os.system("cls" if platform.system().lower() == "windows" else "clear")
 
+
+
+main_files = ['model.pkl',
+              'model_accugrads.pkl',
+              'model_moments.pkl',
+              'meta.pkl']
+
+intermediate_files = ['model0*.pkl',
+                      'model_accugrads0*.pkl',
+                      'model_moments0*.pkl',
+                      'meta0*.pkl']
+
+
+def restore_from_checkpoint():
+
+    try: model_ckpt = max(glob('model0*.pkl'), key=os.path.getctime)
+    except: model_ckpt = None
+    try: accugrad_ckpt = max(glob('model_accugrads0*.pkl'), key=os.path.getctime)
+    except: accugrad_ckpt = None
+    try: moment_ckpt = max(glob('model_moments0*.pkl'), key=os.path.getctime)
+    except: moment_ckpt = None
+    try: meta_ckpt = max(glob('meta0*.pkl'), key=os.path.getctime)
+    except: meta_ckpt = None
+    for name, item in zip(main_files, [model_ckpt, accugrad_ckpt, moment_ckpt, meta_ckpt]):
+        if item is not None and input(f'Restore {item} -> {name}? y/n: ').lower() == 'y':
+            os.remove(name)
+            os.rename(item, name)
+            print(f'restored.')
+
 def remove_training_data():
     import os.path
-    to_remove = ['last_loss.pkl']
+    to_remove = []
+    to_remove.extend(glob('meta*.pkl'))
     to_remove.extend(glob('model*.pkl'))
-    to_remove.extend(glob('loss*.txt'))
+    to_remove.extend(glob('*.txt'))
     for e in to_remove:
         if os.path.exists(e):
             os.remove(e)
@@ -152,11 +206,10 @@ def remove_preprocess_data():
         print(f'removed {e}.')
 
 def remove_intermediate_data():
-    for thing in ['model*pkl','model_accugrads*.pkl','model_moments*.pkl','loss*.txt','meta*.pkl']:
-        things = glob(thing)
+    for something in intermediate_files:
+        things = glob(something)
         for it in things:
-            if it != "model.pkl" and it != "model_accugrads.pkl" and it != "model_moments" and it != "meta.pkl":
-                os.remove(it) ; print(f'Removed {it}.')    
+            os.remove(it) ; print(f'Removed {it}.')    
 
 
 

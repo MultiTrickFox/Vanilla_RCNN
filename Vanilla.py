@@ -259,16 +259,16 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, target_t=None
 
     state = remember * short_mem + (1 - remember) * state
 
-    if dropout != 0.0:
-        drop = random.choices(range(len(state)), k=int(len(state) * dropout))
-        for _ in drop: state[_] = 0
-
     produced_context.append(state)
 
     # layer : convolution
 
     layer = model[1]
-    input = produced_context[0]
+    input = produced_context[-1]
+
+    if dropout != 0.0:
+        drop = random.choices(range(len(input)), k=int(len(input) * dropout))
+        for _ in drop: input[_] = 0
 
     convolutions = [vector_convolve(input, filter_values=filter, filter_weights=layer['wf'+str(_)])
                     for _, filter in enumerate(filters)]
@@ -304,11 +304,6 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, target_t=None
     state = remember * short_mem + (1-remember) * state
 
     produced_outputs.append(state.squeeze(dim=0))
-
-    if dropout != 0.0:
-        drop = random.choices(range(len(state)), k=int(len(state) * dropout))
-        for _ in drop: state[_] = 0
-
     produced_context.append(state)
 
     # layer : decision
@@ -355,10 +350,6 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, target_t=None
 
                 state = remember * short_mem + (1 - remember) * state
                 output = state
-
-                if dropout != 0.0:
-                    drop = random.choices(range(len(output)), k=int(len(output) * dropout))
-                    for _ in drop: output[_] = 0
 
                 produced_context[-1].append(state)
                 decision_outputs[-1].append(output)
@@ -420,6 +411,10 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, target_t=None
             input2 = target_t[0] if target_t is not None else produced_outputs[0].unsqueeze(0)
             state = states[0]                   # torch.tensor(, requires_grad=False)
 
+            if dropout != 0.0:
+                drop = random.choices(range(len(input)), k=int(len(input) * dropout))
+                for _ in drop: input[_] = 0
+
             remember = torch.sigmoid(
                 torch.matmul(input, layer['vr']) +
                 torch.matmul(input2, layer['vr2']) +
@@ -443,10 +438,6 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, target_t=None
 
             state = remember * short_mem + (1-remember) * state
             output = state
-
-            if dropout != 0.0:
-                drop = random.choices(range(len(output)), k=int(len(output) * dropout))
-                for _ in drop: output[_] = 0
 
             produced_context[-1].append(state)
             decision_outputs[-1].append(output)
@@ -473,7 +464,7 @@ def vector_convolve(vector, filter_values, filter_weights):
     return torch.Tensor(convolution)
 
 
-def loss_wrt_distance(output_seq, label_seq):
+def default_loss_fn(output_seq, label_seq, which_loss=None):
 
     sequence_losses = [[],[],[],[]]
 
@@ -487,7 +478,10 @@ def loss_wrt_distance(output_seq, label_seq):
             loss = (lbl_e - pred_e).pow(2)
             # loss = lbl_e * -(torch.log(pred_e)) if lbl_e != 0 else 0
 
-            sequence_losses[_].append(loss.sum())
+            if which_loss is not None:
+                if _ == which_loss:
+                    sequence_losses[_].append(loss.sum())
+            else: sequence_losses[_].append(loss.sum())
 
     return sequence_losses
 

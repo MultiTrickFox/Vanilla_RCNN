@@ -14,9 +14,6 @@ from Vanilla                          \
     import update_model_rmsprop        \
     as optimize_model
 
-num_workers = torch.multiprocessing.cpu_count()
-loss_fn = Vanilla.loss_wrt_distance
-
 
 
     # model struct
@@ -49,7 +46,9 @@ adam_alpha_accugrad = 0.999
 
 dropout = 0.0
 
-loss_multipliers = Vanilla.default_loss_multipliers
+which_loss = None
+num_workers = torch.multiprocessing.cpu_count()
+
 
 
     # # #
@@ -73,7 +72,7 @@ def train_rms(model, accu_grads, data, num_epochs=1):
 
                 # create procs
 
-                results = pool.map_async(process_fn, [[model.copy(), e] for e in batch])
+                results = pool.map_async(process_fn, [[model.copy(), e, filters, dropout, which_loss] for e in batch])
 
                 pool.close()
 
@@ -95,15 +94,15 @@ def train_rms(model, accu_grads, data, num_epochs=1):
 
         losses.append(epoch_loss)
 
-        epoch_loss = [round(e,3) for e in epoch_loss]
-        print(f'epoch {epoch} loss {epoch_loss}')
+        print([round(e,3) for e in epoch_loss])
+        
 
     return model, accu_grads, losses
 
 
 def process_fn(fn_input):
 
-    model, data = fn_input
+    model, data, filters, dropout, which_loss = fn_input
     x_vocab, x_oct, x_dur, x_vol, y_vocab, y_oct, y_dur, y_vol = data
 
     in_time_length = len(x_vocab)
@@ -116,11 +115,11 @@ def process_fn(fn_input):
 
     response = Vanilla.forward_prop(model, inp, response=trg, gen_iterations=out_time_length, filters=filters, dropout=dropout)
 
-    sequence_losses = loss_fn(response, trg)
+    sequence_losses = Vanilla.default_loss_fn(response, trg, which_loss)
 
     loss = [float(sum(element)) for element in sequence_losses]
 
-    Vanilla.update_gradients(sequence_losses, loss_multipliers=loss_multipliers)
+    Vanilla.update_gradients(sequence_losses)
 
     grads = Vanilla.return_grads(model)
 
@@ -141,11 +140,11 @@ def init_accugrads(model):
 
 def save_accugrads(accu_grads, model_id=None):
     model_id = '' if model_id is None else str(model_id)
-    resources.pickle_save(accu_grads, 'model' + model_id + '_accugrads.pkl')
+    resources.pickle_save(accu_grads, 'model_accugrads' + model_id + '.pkl')
 
 def load_accugrads(model, model_id=None):
     model_id = '' if model_id is None else str(model_id)
-    accu_grads = resources.pickle_load('model' + model_id + '_accugrads.pkl')
+    accu_grads = resources.pickle_load('model_accugrads' + model_id + '.pkl')
     if accu_grads is not None:
         print('> accugrads.pkl loaded.')
     else:
@@ -165,11 +164,11 @@ def init_moments(model):
 
 def save_moments(moments, model_id=None):
     model_id = '' if model_id is None else str(model_id)
-    resources.pickle_save(moments, 'model' + model_id + '_moments.pkl')
+    resources.pickle_save(moments, 'model_moments' + model_id + '.pkl')
 
 def load_moments(model, model_id=None):
     model_id = '' if model_id is None else str(model_id)
-    moments = resources.pickle_load('model' + model_id + '_moments.pkl')
+    moments = resources.pickle_load('model_moments' + model_id + '.pkl')
     if moments is not None:
         print('> moments.pkl loaded.')
     else:
