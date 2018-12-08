@@ -192,7 +192,7 @@ def plot_loss_txts(which_loss=None, hm_mins_refresh=2):
 
     loss_paths = ['loss_1.txt', 'loss_2.txt', 'loss_3.txt', 'loss_4.txt']
 
-    file_paths = [loss_paths[which_loss-1]] if which_loss is not None else loss_paths
+    file_paths = [loss_paths[e-1] for e in which_loss] if which_loss is not None else loss_paths
 
     fig = plot.figure()
     axis = fig.add_subplot(1, 1, 1)
@@ -206,20 +206,24 @@ def plot_loss_txts(which_loss=None, hm_mins_refresh=2):
         for file_path in file_paths:
             try:
                 with open(file_path, 'r') as f:
-                    for line in f.readlines():
+                    lines = f.readlines()
+                    hm_epoch = len(lines)
+                    for line in lines:
                         epoch, loss = line.split(',')
                         loss = float(loss[:-1])
                         if loss != 999999999:
+                            # if len(epochs) != hm_epochs: # todo: multifile reading
                             epochs.append(int(epoch))
                             losses.append(int(loss))
+                        else: hm_epoch -=1
             except: pass
 
         axis.clear()
-        axis.plot(epochs, losses[:len(epochs)], 'r')
+        axis.plot(epochs, losses[:len(epochs)], random.choice(['r','g','b']))
         try:
-            axis.plot(epochs, losses[len(epochs) * 2: len(epochs) * 3], 'g')
-            axis.plot(epochs, losses[len(epochs):len(epochs) * 2], 'b')
-            axis.plot(epochs, losses[len(epochs) * 3: len(epochs) * 4], 'y')
+            axis.plot(epochs, losses[len(epochs) * 2: len(epochs) * 3], 'r')
+            axis.plot(epochs, losses[len(epochs):len(epochs) * 2], 'g')
+            axis.plot(epochs, losses[len(epochs) * 3: len(epochs) * 4], 'b')
         except: pass
 
     ani = animation.FuncAnimation(fig, animate, hm_mins_refresh)
@@ -230,7 +234,13 @@ def plot_loss_txts(which_loss=None, hm_mins_refresh=2):
 
 
 def graph_bootstrap():
-    plot_loss_txts(int(input('> loss number to display : ')))
+    
+    arr = []
+    print('> loss number(s) to display :')
+    while (len(arr) < 1):
+        arr.extend(input().split(" "))
+     
+    plot_loss_txts(tuple(int(e) for e in arr))
 
 
 

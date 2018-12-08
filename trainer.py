@@ -94,8 +94,8 @@ def train_rms(model, accu_grads, data, num_epochs=1):
 
         losses.append(epoch_loss)
 
-        print([round(e,3) for e in epoch_loss])
-        
+        #print([round(e,3) for e in epoch_loss])
+        print(epoch_loss)
 
     return model, accu_grads, losses
 
@@ -200,7 +200,7 @@ def train_adam(model, accu_grads, moments, data, epoch_nr=None, num_epochs=1):
 
                 # create procs
 
-                results = pool.map_async(process_fn, [[model.copy(), e] for e in batch])
+                results = pool.map_async(process_fn, [[model.copy(), e, filters, dropout, which_loss] for e in batch])
 
                 pool.close()
 

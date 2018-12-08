@@ -5,15 +5,17 @@ import gc
 from multiprocessing import Pool, cpu_count
 from glob import glob
 
+
 import music21
 
 
 #   params
 
+
 SPLIT_DURATION = 2
 
-min_phrase_len = 5
-max_phrase_len = 25
+min_phrase_len = 7
+max_phrase_len = 55
 
 MAX_OCTAVE = 7
 MAX_DURATION = 8
@@ -62,7 +64,7 @@ def preprocess(raw_files):
 
         for result in results.get():
             for e,re in zip(data,result):
-                if len(re)>= 0: e.append(re)
+                if len(re)>= 0: e.extend(re)
 
     return data
 
@@ -128,9 +130,10 @@ def parse_file(stream):
 # helpers
 
 
+converted_split_dur = SPLIT_DURATION/MAX_DURATION
 def split_cond(dur_vect):
     for dur in dur_vect:
-        if dur >= SPLIT_DURATION: return True
+        if dur >= converted_split_dur: return True
     return False
 
 
@@ -214,12 +217,12 @@ def bootstrap():
         for batch_id, files in enumerate(resources.batchify(raw_files, batch_len)):
 
             data = preprocess(raw_files=files)
+            data_len = len(data[0])
 
-            resources.pickle_save(data, 'samples_' + str(batch_id) + '.pkl')
-            data_size += len(data)
-            data = None ; gc.collect()
+            resources.pickle_save(data, 'samples_' + str(batch_id+1) + '.pkl')
+            data_size += data_len
 
-            print(f'Batch {batch_id} of {hm_batches} completed : Total of {data_size} samples.')
+            print(f'Batch {batch_id+1} of {hm_batches} completed : {data_len} samples.'); data = None ; gc.collect()
         print(f'Total of {data_size} samples saved.')
         return data_size
     else:

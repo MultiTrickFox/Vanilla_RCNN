@@ -17,7 +17,6 @@ def bootstrap():
 
         print('Error : No .mid files found.')
         file = None
-        # file = os.path.abspath(input('Drag & Drop midi file: '))
 
     try:
 
@@ -36,7 +35,6 @@ def bootstrap():
 
         if len(data) > 0:
 
-            print('Asking ai..')
             response = interact_debug.bootstrap(data)
 
             print("-----")
@@ -55,4 +53,4 @@ def bootstrap():
 
 if __name__ == '__main__':
     bootstrap()
-    input('Hit any key to continue..')
+    input('Hit enter to continue..')

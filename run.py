@@ -19,16 +19,16 @@ def main():
 
     while True:
         display_options()
-        inp = input('> input: ')
+        inp = input('\n> input: ')
         clear_sc()
 
-        if inp == '1':
+        if inp == '1' or inp.startswith('s'):
             print(f'> {resources.get_datasize(parent.data_path)}')
             
-        elif inp == '2':
+        elif inp == '2' or inp.startswith('p'):
             preproc.bootstrap()
 
-        elif inp == '3':
+        elif inp == '3' or inp.startswith('t'):
 
             # inp essential args
             
@@ -41,9 +41,9 @@ def main():
             # inp optional args
 
             params, args = [], []
-            print('> optional args: (hit enter when done) ')
+            print('> optional args: ')
             while(True):
-                inp = input()
+                inp = input('(hit enter when done) ')
                 if inp == '':
                     break
                 else:
@@ -65,95 +65,85 @@ def main():
                 elif p == 'startadv': parent.start_advanced = bool(a)
                 elif p == 'adv': parent.further_parenting = bool(a)
                 elif p == 'drop': parent.dropout = float(a)
-                elif p == 'onlyloss': parent.only_loss_on = int(a)
-                else: print('Available params: lr1,lr2,startadv,adv,drop,onlyloss')
-
+                elif p == 'onlyloss':parent.only_loss_on = tuple(int(a)-1 for a in a.split(','))
             clear_sc();
 
             parent.bootstrap(True, int(ep), int(ds), int(bs))
                     
         
-        elif inp == '4':
+        elif inp == '4' or inp.startswith('m'):
             interact_midi.bootstrap()
 
-        elif inp == '5':
+        elif inp == '5' or inp.startswith('i'):
             # interact.bootstrap() # will come someday
             pass
 
-        elif inp == 'graph':
+        elif inp.startswith('g'):
             resources.graph_bootstrap()
 
         elif inp == 'manual':
             interact_debug.bootstrap()
 
-        elif inp == 'debug':
+        elif inp.startswith('d'):
             
             display_debug_options()
 
-            while(True):
+            inp = input('\n> debug-input: ')
+            clear_sc()
 
-                inp = input('>debug-input: ')
-                clear_sc()
+            if inp == '1':
+                try:
+                    restore_from_checkpoint()
+                    print('done.')
+                except Exception as e: print('Op error: ', e)
 
-                if inp == '1':
-                    try:
-                        restore_from_checkpoint()
-                        print('done.')
-                    except Exception as e: print('Op error: ', e)
+            elif inp == '2' and input('Removes intermediate files, continue? (y/n): ').lower() == 'y':
+                try:
+                    remove_intermediate_data()
+                    print('done.')
+                except Exception as e: print('Op error: ', e)
 
-                elif inp == '2' and input('Removes intermediate data, continue? (y/n): ').lower() == 'y':
-                    try:
-                        remove_intermediate_data()
-                        print('done.')
-                    except Exception as e: print('Op error: ', e)
-
-                
-                elif inp == '3' and input('Removes .pkl data, continue? (y/n): ').lower() == 'y':
-                    try:
-                        remove_preprocess_data()
-                        print('done.')
-                    except Exception as e: print('Op error: ', e)
+            
+            elif inp == '3' and input('Removes processed work, continue? (y/n): ').lower() == 'y':
+                try:
+                    remove_preprocess_data()
+                    print('done.')
+                except Exception as e: print('Op error: ', e)
 
 
-                if inp == '4' and input('Removes trained model, continue? (y/n): ').lower() == 'y':
-                    try:
-                        remove_training_data()
-                        print('done.')
-                    except Exception as e: print('Op error: ', e)
+            if inp == '4' and input('Cleans up model data continue? (y/n): ').lower() == 'y':
+                try:
+                    remove_training_data()
+                    print('done.')
+                except Exception as e: print('Op error: ', e)
 
-
-                else: break
 
         elif inp == '0': break
         else: pass
 
-        input('\n Hit any key to continue..')
+        input('\n Hit Enter to continue..')
         clear_sc()
 
 
 def display_options():
 
     print('\n \t Options: \n')
-    print('1- Current datasize')
-    print('2- Preprocess samples')
-    print('3- Train model')
-    print('4- Midi response')
-    print('5- Interact')
-    print('0- ')
+    print('(1)- Current datasize')
+    print('(2)- Preprocess samples')
+    print('(3)- Train model')
+    print('(4)- Midi response')
+    print('(5)- Interact')
+    print('0 - exit.')
     print('---------')
 
 def display_debug_options():
 
     print('\n \t\t Debug Menu: \n')
-    print('1- Restore from checkpoint.')
-    print('2- Remove checkpoint data.')
-    print('3- Remove data .pkls')
-    print('4- Remove model. ')
-    
-    print('0- Return')
-    # print('4- Midi response')
-    # print('5- Interact')
-    # print('0- ')
+    print('1 - Restore from latest checkpoint.')
+    print('2 - Clear checkpoints.')
+    print('3 - Clear .pkls')
+    print('4 - Remove model. ')
+    print('0- return.')
     print('---------')
 
 def clear_sc():
@@ -171,6 +161,8 @@ intermediate_files = ['model0*.pkl',
                       'model_moments0*.pkl',
                       'meta0*.pkl']
 
+all_model_files = ['model*.pkl']
+
 
 def restore_from_checkpoint():
 
@@ -184,7 +176,8 @@ def restore_from_checkpoint():
     except: meta_ckpt = None
     for name, item in zip(main_files, [model_ckpt, accugrad_ckpt, moment_ckpt, meta_ckpt]):
         if item is not None and input(f'Restore {item} -> {name}? y/n: ').lower() == 'y':
-            os.remove(name)
+            try: os.remove(name)
+            except: pass
             os.rename(item, name)
             print(f'restored.')
 
@@ -193,7 +186,7 @@ def remove_training_data():
     to_remove = []
     to_remove.extend(glob('meta*.pkl'))
     to_remove.extend(glob('model*.pkl'))
-    to_remove.extend(glob('*.txt'))
+    to_remove.extend(glob('loss*.txt'))
     for e in to_remove:
         if os.path.exists(e):
             os.remove(e)
@@ -209,7 +202,10 @@ def remove_intermediate_data():
     for something in intermediate_files:
         things = glob(something)
         for it in things:
-            os.remove(it) ; print(f'Removed {it}.')    
+            os.remove(it) ; print(f'Removed {it}.')
+    for leftover in all_model_files:
+        leftovers = glob(leftover)
+        [os.remove(this) for this in leftovers if this not in main_files]
 
 
 

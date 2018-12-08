@@ -22,7 +22,7 @@ requirements:
 http://download.pytorch.org/whl/cu90/torch-0.4.0-cp36-cp36m-win_amd64.whl - python3.6 version only.)
 
 >also music21 v5.1.0 is required for preprocess
-& interaction purposes @
+and interaction purposes @
 (pip3 install music21==5.1.0
 
 
@@ -102,41 +102,4 @@ Have .pkl files ready at project dir
 
 >- Run.py -> Training
 
-
-
-(Extra) Training Options:
-
-
->- startadv:
-
->run training using adaptive momentum
-
->default: startadv=False
-
->- lr1, lr2:
-
->learning rates for two modes respectively
-
->default: lr1=0.001
-
->default: lr2=0.01
-
->- drop:
-
->neurons randomly "drop" to generalize better
-
->default: drop=0.1
-
->- onlyloss:
-
->model trained on only a single dimension of output
-
->default: onlyloss=None
-
->- adv
-
->(not frequently used)
-
->both modes of sgd are run on same dataset, sequentially, no shuffle occurs. (where each separate training run causes a dataset shuffle, for better generalization.)
-
->default: adv=False
+>- (Optional) trainer parameters provided as .txt

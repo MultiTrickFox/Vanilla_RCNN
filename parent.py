@@ -77,7 +77,7 @@ def simple_parenting(model, accugrads, data, last_loss):
     successful_epochs = 0
 
     checkpoints = []
-    prevStep = (model, accugrads, last_loss)
+    prevStep = (model, accugrads, loss_initial)
 
 
         # begin parenting
@@ -152,13 +152,13 @@ def simple_parenting(model, accugrads, data, last_loss):
 
                     break
 
-                if all(np.array(this_loss[0]) <= np.array(prev_loss[0])) and branch_ctr != 0:
+                elif all(np.array(this_loss[0]) <= np.array(prev_loss[0])) and branch_ctr != 0:
 
                     branch_points.append(branch_prevStep)
 
                     branch_prevStep = branch_thisStep
 
-                branch_ctr += 1
+                branch_ctr +=1
 
 
     del checkpoints[0]
@@ -179,7 +179,7 @@ def advanced_parenting(model, accugrads, moments, data, last_loss):
 
     checkpoints = []
 
-    prevStep = (model, accugrads, moments, last_loss)
+    prevStep = (model, accugrads, moments, loss_initial)
 
 
         # begin parenting
@@ -229,7 +229,7 @@ def advanced_parenting(model, accugrads, moments, data, last_loss):
 
                 prev_model, prev_accugrads, prev_moments, prev_loss = branch_prevStep
 
-                branch_thisStep = trainer.train_rms(prev_model, prev_accugrads, prev_moments, data) ; this_loss = branch_thisStep[-1]
+                branch_thisStep = trainer.train_adam(prev_model, prev_accugrads, prev_moments, data) ; this_loss = branch_thisStep[-1]
 
                 if all(np.array(this_loss[0]) <= np.array(branch_goal[0])) and branch_ctr != 0:
 
@@ -282,6 +282,11 @@ def save_checkpoint(step, save_id=None):
     save_id = "" if save_id is None else str(save_id)
     resources.pickle_save(step[-1], 'meta'+save_id+'.pkl')
 
+import os
+def cleanup_past_moments():
+    try:os.remove('model_moments.pkl')
+    except:pass
+
 
 
 # parent runners
@@ -299,6 +304,7 @@ def run_simple_parenting(data):
     # initialize metadata
     last_loss = resources.pickle_load('meta.pkl')
     if last_loss is None: last_loss = loss_initial
+    else: last_loss = [[e if e>0 else 999_999] for e in last_loss[0]]
     accugrads = trainer.load_accugrads(model)
 
     # get checkpoints
@@ -326,6 +332,7 @@ def run_advanced_parenting(data):
     # initalize metadata
     last_loss = resources.pickle_load('meta.pkl')
     if last_loss is None: last_loss = loss_initial
+    else: last_loss = [[e if e>0 else 999_999] for e in last_loss[0]]
     accugrads = trainer.load_accugrads(model)
     moments = trainer.load_moments(model)
 
@@ -354,9 +361,9 @@ def bootstrap(custom=False,ep=None,ds=None,bs=None):
         global data_size   ; data_size    = ds
         global batch_size  ; batch_size   = bs
 
-        global advanced_parenting, further_parenting
-        if advanced_parenting is not None and further_parenting is not None:
-            if further_parenting: advanced_parenting = False
+    global advanced_parenting, further_parenting
+    if advanced_parenting is not None and further_parenting is not None:
+        if further_parenting: advanced_parenting = False
 
     # connections to trainer set
 
@@ -365,8 +372,7 @@ def bootstrap(custom=False,ep=None,ds=None,bs=None):
     trainer.dropout = dropout
     trainer.batch_size = batch_size
     trainer.loss_multipliers = loss_multipliers
-    if only_loss_on is not None:
-        trainer.which_loss = only_loss_on
+    trainer.which_loss = only_loss_on
 
     # display details
 
@@ -391,6 +397,8 @@ def bootstrap(custom=False,ep=None,ds=None,bs=None):
         if further_parenting:  # then further parent
 
             run_advanced_parenting(data)
+
+        else:cleanup_past_moments()
 
     else:                      # OR start advanced
 
