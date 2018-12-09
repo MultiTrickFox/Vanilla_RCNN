@@ -1,4 +1,6 @@
-import Vanilla
+# import Vanilla
+import Vanilla_attention as Vanilla
+
 import trainer
 import resources
 

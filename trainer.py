@@ -3,7 +3,8 @@ import torch
 import random
 import numpy as np
 
-import Vanilla
+# import Vanilla
+import Vanilla_attention as Vanilla
 
 from torch                     \
     import Tensor
