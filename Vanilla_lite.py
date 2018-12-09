@@ -40,17 +40,14 @@ def create_model(filters=default_filters, layers=default_layers):
         {
             'vr': torch.randn([1, hm_vectors], requires_grad=True),
             'ur': torch.randn([vector_size, vector_size], requires_grad=True),
-            'er': torch.randn([1, hm_vectors], requires_grad=True),
             'br': torch.zeros([1, vector_size], requires_grad=True),
 
             'va': torch.randn([1, hm_vectors], requires_grad=True),
             'ua': torch.randn([1, vector_size], requires_grad=True),
-            'ea': torch.randn([1, hm_vectors], requires_grad=True),
             'ba': torch.zeros([1, vector_size], requires_grad=True),
 
             'vs': torch.randn([1, hm_vectors], requires_grad=True),
             'us': torch.randn([1, vector_size], requires_grad=True),
-            'es': torch.randn([1, hm_vectors], requires_grad=True),
             'bs': torch.zeros([1, vector_size], requires_grad=True),
         }
     )
@@ -69,18 +66,18 @@ def create_model(filters=default_filters, layers=default_layers):
 
     model.append(
         {
-            'vr': torch.randn([in_size, vector_size], requires_grad=True),
+            'vr': torch.randn([1, hm_filters], requires_grad=True),
+            'vr2': torch.randn([in_size, vector_size], requires_grad=True),
             'ur': torch.randn([1, vector_size], requires_grad=True),
-            'er': torch.randn([1, hm_vectors], requires_grad=True),
             'br': torch.zeros([1, vector_size], requires_grad=True),
 
-            'va': torch.randn([in_size, vector_size], requires_grad=True),
-            'ua': torch.randn([vector_size, vector_size], requires_grad=True),
-            'ea': torch.randn([1, hm_vectors], requires_grad=True),
+            'va': torch.randn([1, hm_filters], requires_grad=True),
+            'va2': torch.randn([in_size, vector_size], requires_grad=True),
+            'ua': torch.randn([1, vector_size], requires_grad=True),
             'ba': torch.zeros([1, vector_size], requires_grad=True),
 
-            'vs': torch.randn([in_size, vector_size], requires_grad=True),
-            'es': torch.randn([1, hm_vectors], requires_grad=True),
+            'vs': torch.randn([1, hm_filters], requires_grad=True),
+            'vs2': torch.randn([in_size, vector_size], requires_grad=True),
             'bs': torch.zeros([1, vector_size], requires_grad=True),
         }
     )
@@ -190,7 +187,6 @@ def forward_prop(model, sequence, context=None, gen_seed=None, gen_iterations=No
     #   generate
 
     states = [states[-1]]
-    encoder_out = outputs
     outputs = [gen_seed] if gen_seed is not None else [outputs[-1]]
 
     if gen_iterations is None:
@@ -198,7 +194,7 @@ def forward_prop(model, sequence, context=None, gen_seed=None, gen_iterations=No
         t = 0
         while t < max_prop_time:
 
-            output, state = forward_prop_t(model, outputs[-1], states[-1], filters=filters, dropout=0.0, encoder_out=encoder_out)
+            output, state = forward_prop_t(model, outputs[-1], states[-1], filters=filters, dropout=0.0)
 
             outputs.append(output)
             states.append(state)
@@ -209,7 +205,7 @@ def forward_prop(model, sequence, context=None, gen_seed=None, gen_iterations=No
     else:
 
         for t in range(gen_iterations):
-            output, state = forward_prop_t(model, outputs[-1], states[-1], filters=filters, dropout=dropout, encoder_out=encoder_out)
+            output, state = forward_prop_t(model, outputs[-1], states[-1], filters=filters, dropout=dropout)
 
             outputs.append(output)
             states.append(state)
@@ -218,7 +214,7 @@ def forward_prop(model, sequence, context=None, gen_seed=None, gen_iterations=No
     return outputs
 
 
-def forward_prop_t(model, sequence_t, context_t, filters, dropout, encoder_out=None): # todo what to do with encoder out? who to send..
+def forward_prop_t(model, sequence_t, context_t, filters, dropout):
     produced_outputs = []
     produced_context = []
 
@@ -228,28 +224,21 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, encoder_out=N
     state = context_t[0]
     input = torch.stack(sequence_t, 0)
 
-    if encoder_out is not None:
-        encoder_out = sum([torch.stack(e,0) for e in encoder_out])
-    else: encoder_out = torch.zeros_like(input,requires_grad=False)
-
     remember = torch.sigmoid(
         torch.matmul(layer['vr'], input) +
         torch.matmul(state, layer['ur']) +
-        torch.matmul(layer['er'], encoder_out) +
         layer['br']
     )
 
     attention = torch.tanh(
         torch.matmul(layer['va'], input) +
         torch.mul(state, layer['ua']) +
-        torch.matmul(layer['ea'], encoder_out) +
         layer['ba']
     )
 
     short_mem = torch.tanh(
         torch.matmul(layer['vs'], input) +
         attention * state +
-        torch.matmul(layer['es'], encoder_out) +
         layer['bs']
     )
 
@@ -273,26 +262,27 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, encoder_out=N
 
     layer = model[2]
     state = context_t[1]
-    input = torch.cat(convolutions).unsqueeze(0)
+    input = torch.stack(convolutions, 0)
+    # input2 = torch.cat(convolutions).unsqueeze(0)
 
     remember = torch.sigmoid(
-        torch.matmul(input, layer['vr']) +
-        torch.mul(state, layer['ur']) +
-        torch.matmul(layer['er'], encoder_out) +
+        torch.matmul(layer['vr'], input) +
+        torch.mul(layer['ur'], state) +
+        # torch.matmul(input2, layer['vr2']) +
         layer['br']
     )
 
     attention = torch.tanh(
-        torch.matmul(input, layer['va']) +
-        torch.matmul(state, layer['ua']) +
-        torch.matmul(layer['ea'], encoder_out) +
+        torch.matmul(layer['va'], input) +
+        torch.mul(layer['ua'], state) +
+        # torch.matmul(input2, layer['va2']) +
         layer['ba']
     )
 
     short_mem = torch.tanh(
-        torch.matmul(input, layer['vs']) +
+        torch.matmul(layer['vs'], input) +
         attention * state +
-        torch.matmul(layer['es'], encoder_out) +
+        # torch.matmul(input2, layer['vs2']) +
         layer['bs']
     )
 
@@ -326,19 +316,19 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, encoder_out=N
                 remember = torch.sigmoid(
                     torch.matmul(input, layer['vr' + str_]) +
                     torch.matmul(state, layer['ur' + str_])
-                    + layer['br']
+                    # + layer['br']
                 )
 
                 attention = torch.sigmoid(
                     torch.matmul(input, layer['va' + str_]) +
                     torch.matmul(state, layer['ua' + str_])
-                    + layer['ba']
+                    # + layer['ba']
                 )
 
                 short_mem = torch.tanh(
                     torch.matmul(input, layer['vs' + str_]) +
                     attention * state
-                    + layer['bs']
+                    # + layer['bs']
                 )
 
                 state = remember * short_mem + (1 - remember) * state
@@ -363,27 +353,27 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, encoder_out=N
                     torch.matmul(input, layer['vr' + str_]) +
                     torch.matmul(input2, layer['wif_r' + str_]) +
                     torch.mul(state, layer['ur' + str_])
-                    + layer['br']
+                    # + layer['br']
                 )
 
                 forget = torch.sigmoid(
                     torch.matmul(input, layer['vf' + str_]) +
                     torch.matmul(input2, layer['wif_f' + str_]) +
                     torch.mul(state, layer['uf' + str_])
-                    + layer['bf']
+                    # + layer['bf']
                 )
 
                 attention = torch.sigmoid(
                     torch.matmul(input, layer['va' + str_]) +
                     torch.matmul(input2, layer['wif_a' + str_]) +
                     torch.mul(state, layer['ua' + str_])
-                    + layer['ba']
+                    # + layer['ba']
                 )
 
                 short_mem = torch.tanh(
                     torch.matmul(input, layer['vs' + str_]) +
                     state * layer['us' + str_]
-                    + layer['bs']
+                    # + layer['bs']
                 )
 
                 state = remember * short_mem + forget * state

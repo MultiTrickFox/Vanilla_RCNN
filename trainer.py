@@ -3,15 +3,14 @@ import torch
 import random
 import numpy as np
 
-# import Vanilla
-import Vanilla_attention as Vanilla
+import Vanilla
 
 from torch                     \
     import Tensor
 from torch.multiprocessing       \
     import Pool
 
-from Vanilla                          \
+from Vanilla_lite                          \
     import update_model_rmsprop        \
     as optimize_model
 

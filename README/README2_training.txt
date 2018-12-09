@@ -4,10 +4,13 @@
 
 
 
-			> run sessions with: onlyloss=1,2,3,4 for whole training
-
-
 <datasize> <batch_size> <epochs>	<other session params>
+
+30000 200 50				drop=0.3
+30000 150 50				drop=0.2
+
+
+
 
 45000 300 10
 45000 200 10
@@ -21,11 +24,4 @@
 
 optional next: 25000 50 20 's
 *(total epochs around 150 ~ 300)
-
-
-
-			> run sessions with: onlyloss=<item>,<item>.. ; (suggested way is one item per training)
-
-
-repeat same, with higher dropouts. (i.e. 0.5 downto 0.1 with smaller epochs.)
 
