@@ -13,7 +13,7 @@ default_layers = (8, 5, 10)
 
 default_filters = (
 
-    # (3, 4),         # 3rd range
+    (3, 4),         # 3rd range
     (6, 7, 8),      # 5th range
     # (9, 10, 11),    # 6-7th range
     # (6, 7, 1, 2),   # 7-2th range
@@ -107,7 +107,7 @@ def create_model(filters=default_filters, layers=default_layers):
             # initial layer
         if _ == 0:
 
-            for __ in range(1, hm_vectors):
+            for __ in range(hm_vectors):
                 str_ = '_' + str(__)
 
                 layer['vr' + str_] = torch.randn([in_size, layer_size], requires_grad=True)
@@ -307,7 +307,7 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout):
         # initial layer : gru
         if _ == 0:
 
-            for __ in range(1, hm_vectors):
+            for __ in range(hm_vectors):
                 str_ = '_' + str(__)
 
                 input = sequence_t[__]
@@ -539,7 +539,7 @@ def init_states(model):
 
         if _ == 0:
             states_t0.append(
-                [torch.zeros([1, layer['vr_1'].size()[1]], requires_grad=False) for __ in range(1, hm_vectors)])
+                [torch.zeros([1, layer['vr_1'].size()[1]], requires_grad=False) for __ in range(hm_vectors)])
 
         elif _ == hm_layers - 1:
             states_t0.append(
@@ -547,7 +547,7 @@ def init_states(model):
 
         else:
             states_t0.append(
-                [torch.zeros([1, layer['vr'].size()[1]], requires_grad=False) for __ in range(1, hm_vectors)])
+                [torch.zeros([1, layer['vr'].size()[1]], requires_grad=False) for __ in range(hm_vectors)])
 
     return [states_t0]
 
