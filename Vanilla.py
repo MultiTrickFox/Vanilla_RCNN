@@ -123,7 +123,7 @@ def create_model(filters=default_filters, layers=default_layers):
 
             in_size2 = layers[_ - 2]
 
-            for __ in range(1, hm_vectors):
+            for __ in range(hm_vectors):
                 str_ = '_' + str(__)
 
                 layer['vr' + str_] = torch.randn([in_size, layer_size], requires_grad=True)
@@ -171,7 +171,7 @@ def create_model(filters=default_filters, layers=default_layers):
 # Forward Prop
 
 
-def forward_prop(model, sequence, response=None, context=None, gen_seed=None, gen_iterations=None,
+def forward_prop(model, sequence, context=None, gen_seed=None, gen_iterations=None,
                  filters=default_filters, dropout=0.0):
     #   listen
 
@@ -205,8 +205,7 @@ def forward_prop(model, sequence, response=None, context=None, gen_seed=None, ge
     else:
 
         for t in range(gen_iterations):
-            output, state = forward_prop_t(model, outputs[-1], states[-1], filters=filters, dropout=dropout,
-                                           target_t=response[t])
+            output, state = forward_prop_t(model, outputs[-1], states[-1], filters=filters, dropout=dropout)
 
             outputs.append(output)
             states.append(state)
@@ -215,7 +214,7 @@ def forward_prop(model, sequence, response=None, context=None, gen_seed=None, ge
     return outputs
 
 
-def forward_prop_t(model, sequence_t, context_t, filters, dropout, target_t=None):
+def forward_prop_t(model, sequence_t, context_t, filters, dropout):
     produced_outputs = []
     produced_context = []
 
@@ -288,8 +287,6 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, target_t=None
     )
 
     state = remember * short_mem + (1 - remember) * state
-
-    produced_outputs.append(torch.sigmoid(state.squeeze(dim=0)))
     produced_context.append(state)
 
     # layer : decision
@@ -345,7 +342,7 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, target_t=None
 
             input = decision_outputs[-2][0]
 
-            for __ in range(1, hm_vectors):
+            for __ in range(hm_vectors):
                 str_ = '_' + str(__)
 
                 input2 = decision_outputs[-3][__ - 1]
@@ -392,7 +389,7 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, target_t=None
         else:
 
             input = sum(produced_context[-2])  # sum(decision_outputs[-2])
-            input2 = target_t[0] if target_t is not None else torch.zeros_like(produced_outputs[0].unsqueeze(0), requires_grad=False)
+            input2 = produced_context[1]
             state = states[0]  # torch.tensor(, requires_grad=False)
 
             if dropout != 0.0:
@@ -425,6 +422,7 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, target_t=None
 
             produced_context[-1].append(state)
             decision_outputs[-1].append(output)
+
 
     return produced_outputs, produced_context
 

@@ -113,7 +113,7 @@ def process_fn(fn_input):
     trg = [[Tensor(e) for e in [y_vocab[_], y_oct[_], y_dur[_], y_vol[_]]]
            for _ in range(out_time_length)]
 
-    response = Vanilla.forward_prop(model, inp, response=trg, gen_iterations=out_time_length, filters=filters, dropout=dropout)
+    response = Vanilla.forward_prop(model, inp, gen_iterations=out_time_length, filters=filters, dropout=dropout)
 
     sequence_losses = Vanilla.default_loss_fn(response, trg, which_loss)
 
