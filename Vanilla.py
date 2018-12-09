@@ -13,10 +13,10 @@ default_layers = (8, 5, 10)
 
 default_filters = (
 
-    (3, 4),         # 3rd range
+    # (3, 4),         # 3rd range
     (6, 7, 8),      # 5th range
-    (9, 10, 11),    # 6-7th range
-    (6, 7, 1, 2),   # 7-2th range
+    # (9, 10, 11),    # 6-7th range
+    # (6, 7, 1, 2),   # 7-2th range
 
     # (4, 7),         # major chord
     # (3, 7),         # minor chord

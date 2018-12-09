@@ -165,16 +165,13 @@ all_model_files = ['model*.pkl']
 
 
 def restore_from_checkpoint():
+    ckpts = []
+    
+    for file in intermediate_files:
+        try: ckpts.append(max(glob(file), key=os.path.getmtime))
+        except: ckpts.append(None)
 
-    try: model_ckpt = max(glob('model0*.pkl'), key=os.path.getctime)
-    except: model_ckpt = None
-    try: accugrad_ckpt = max(glob('model_accugrads0*.pkl'), key=os.path.getctime)
-    except: accugrad_ckpt = None
-    try: moment_ckpt = max(glob('model_moments0*.pkl'), key=os.path.getctime)
-    except: moment_ckpt = None
-    try: meta_ckpt = max(glob('meta0*.pkl'), key=os.path.getctime)
-    except: meta_ckpt = None
-    for name, item in zip(main_files, [model_ckpt, accugrad_ckpt, moment_ckpt, meta_ckpt]):
+    for name, item in zip(main_files, ckpts):
         if item is not None and input(f'Restore {item} -> {name}? y/n: ').lower() == 'y':
             try: os.remove(name)
             except: pass
