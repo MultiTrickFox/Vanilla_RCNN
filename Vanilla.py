@@ -287,6 +287,7 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout):
     )
 
     state = remember * short_mem + (1 - remember) * state
+    
     produced_context.append(state)
 
     # layer : decision
