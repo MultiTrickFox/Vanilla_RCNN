@@ -24,14 +24,14 @@ filters =                    \
     ()  # +                       \
     #   ((4, 7), (3, 7), (9, 4))  \
 
-layers = (10, 8, 12)
+layers = (10, 5, 8, 12)
 
 
     # data details
 
 data_path = "sample*.pkl"
-data_size = 25_000
-batch_size = 400
+data_size = 100 # 25_000
+batch_size = 100 # 400
 
 
     # training details
@@ -272,7 +272,7 @@ def advanced_parenting(model, accugrads, moments, data, last_loss):
 
 def get_data(): return resources.load_data(data_path, data_size,really_random=really_random_data)
 
-def get_clock(): return time.asctime(time.localtime(time.time())).split(' ')[4]
+def get_clock(): return time.asctime(time.localtime(time.time())).split(' ')[3]
 
 def save_checkpoint(step, save_id=None):
     for _,e in enumerate(step[:-1]):

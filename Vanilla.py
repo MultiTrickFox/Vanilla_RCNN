@@ -1,10 +1,12 @@
 import torch
 import random
 
+import preproc
+
 hm_vectors = 4
 vector_size = 13
 
-max_prop_time = 20
+max_prop_time = preproc.max_phrase_len
 
 MAX_DURATION = 8
 SPLIT_DURATION = 2
@@ -40,17 +42,17 @@ def create_model(filters=default_filters, layers=default_layers):
         {
             'vr': torch.randn([1, hm_vectors], requires_grad=True),
             'ur': torch.randn([vector_size, vector_size], requires_grad=True),
-            'er': torch.randn([1, hm_vectors], requires_grad=True),
+            'er': torch.randn([1, max_prop_time], requires_grad=True),
             'br': torch.zeros([1, vector_size], requires_grad=True),
 
             'va': torch.randn([1, hm_vectors], requires_grad=True),
             'ua': torch.randn([1, vector_size], requires_grad=True),
-            'ea': torch.randn([1, hm_vectors], requires_grad=True),
+            'ea': torch.randn([1, max_prop_time], requires_grad=True),
             'ba': torch.zeros([1, vector_size], requires_grad=True),
 
             'vs': torch.randn([1, hm_vectors], requires_grad=True),
             'us': torch.randn([1, vector_size], requires_grad=True),
-            'es': torch.randn([1, hm_vectors], requires_grad=True),
+            'es': torch.randn([1, max_prop_time], requires_grad=True),
             'bs': torch.zeros([1, vector_size], requires_grad=True),
         }
     )
@@ -71,16 +73,16 @@ def create_model(filters=default_filters, layers=default_layers):
         {
             'vr': torch.randn([in_size, vector_size], requires_grad=True),
             'ur': torch.randn([1, vector_size], requires_grad=True),
-            'er': torch.randn([1, hm_vectors], requires_grad=True),
+            'er': torch.randn([1, max_prop_time], requires_grad=True),
             'br': torch.zeros([1, vector_size], requires_grad=True),
 
             'va': torch.randn([in_size, vector_size], requires_grad=True),
             'ua': torch.randn([vector_size, vector_size], requires_grad=True),
-            'ea': torch.randn([1, hm_vectors], requires_grad=True),
+            'ea': torch.randn([1, max_prop_time], requires_grad=True),
             'ba': torch.zeros([1, vector_size], requires_grad=True),
 
             'vs': torch.randn([in_size, vector_size], requires_grad=True),
-            'es': torch.randn([1, hm_vectors], requires_grad=True),
+            'es': torch.randn([1, max_prop_time], requires_grad=True),
             'bs': torch.zeros([1, vector_size], requires_grad=True),
         }
     )
@@ -218,7 +220,7 @@ def forward_prop(model, sequence, context=None, gen_seed=None, gen_iterations=No
     return outputs
 
 
-def forward_prop_t(model, sequence_t, context_t, filters, dropout, encoder_out=None): # todo what to do with encoder out? who to send..
+def forward_prop_t(model, sequence_t, context_t, filters, dropout, encoder_out=None):
     produced_outputs = []
     produced_context = []
 
@@ -229,8 +231,12 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, encoder_out=N
     input = torch.stack(sequence_t, 0)
 
     if encoder_out is not None:
-        encoder_out = sum([torch.stack(e,0) for e in encoder_out])
-    else: encoder_out = torch.zeros_like(input,requires_grad=False)
+        enc_out_padded = []
+        for t in range(max_prop_time):
+            try: enc_out_padded.append(sum(encoder_out[t]))
+            except: enc_out_padded.append(torch.zeros(vector_size,requires_grad=False))
+        encoder_out = torch.stack(enc_out_padded, 0)
+    else: encoder_out = torch.stack([torch.zeros(vector_size,requires_grad=False)] * max_prop_time, 0)
 
     remember = torch.sigmoid(
         torch.matmul(layer['vr'], input) +
@@ -553,11 +559,11 @@ def init_states(model):
 
         elif _ == hm_layers - 1:
             states_t0.append(
-                [torch.zeros([1, layer['vr_1'].size()[1]], requires_grad=False) for __ in range(1, hm_vectors)])
+                [torch.zeros([1, layer['vr_1'].size()[1]], requires_grad=False) for __ in range(hm_vectors)])
 
         else:
             states_t0.append(
-                [torch.zeros([1, layer['vr'].size()[1]], requires_grad=False) for __ in range(hm_vectors)])
+                [torch.zeros([1, layer['vr'].size()[1]], requires_grad=False)])
 
     return [states_t0]
 

@@ -10,7 +10,7 @@ from torch                     \
 from torch.multiprocessing       \
     import Pool
 
-from Vanilla_lite                          \
+from Vanilla                          \
     import update_model_rmsprop        \
     as optimize_model
 
@@ -95,7 +95,7 @@ def train_rms(model, accu_grads, data, num_epochs=1):
         losses.append(epoch_loss)
 
         #print([round(e,3) for e in epoch_loss])
-        print(epoch_loss)
+        print(f'trainer loss: {epoch_loss}')
 
     return model, accu_grads, losses
 

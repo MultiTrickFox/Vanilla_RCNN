@@ -11,6 +11,8 @@ is a from-scratch RCNN, using only pytorch's autograd
 
 > How does it do:
 
+>- using encoder -> decoder(+ attention) model, where each of them:
+
 >- convolutions on incoming chords, between fully connected gru layers, to come up with a "likely" chord response; while passing information to a sub network of gru-gru-lstm stack for deciding details (i.e. pitch, velocity etc.)
 
 
