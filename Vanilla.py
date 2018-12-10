@@ -178,21 +178,25 @@ def create_model(filters=default_filters, layers=default_layers):
 
 def forward_prop(model, sequence, context=None, gen_seed=None, gen_iterations=None,
                  filters=default_filters, dropout=0.0):
+
     #   listen
+
+    encoding = generate_encoding()
 
     states = [context] if context is not None else init_states(model)
     outputs = []
 
     for sequence_t in sequence:
-        output, state = forward_prop_t(model, sequence_t, states[-1], filters=filters, dropout=dropout)
+        output, state = forward_prop_t(model, sequence_t, states[-1], filters=filters, dropout=dropout, encoder_out=encoding)
 
         outputs.append(output)
         states.append(state)
 
     #   generate
 
+    encoding = generate_encoding(outputs)
+
     states = [states[-1]]
-    encoder_out = outputs
     outputs = [gen_seed] if gen_seed is not None else [outputs[-1]]
 
     if gen_iterations is None:
@@ -200,7 +204,7 @@ def forward_prop(model, sequence, context=None, gen_seed=None, gen_iterations=No
         t = 0
         while t < max_prop_time:
 
-            output, state = forward_prop_t(model, outputs[-1], states[-1], filters=filters, dropout=0.0, encoder_out=encoder_out)
+            output, state = forward_prop_t(model, outputs[-1], states[-1], filters=filters, dropout=0.0, encoder_out=encoding)
 
             outputs.append(output)
             states.append(state)
@@ -211,7 +215,7 @@ def forward_prop(model, sequence, context=None, gen_seed=None, gen_iterations=No
     else:
 
         for t in range(gen_iterations):
-            output, state = forward_prop_t(model, outputs[-1], states[-1], filters=filters, dropout=dropout, encoder_out=encoder_out)
+            output, state = forward_prop_t(model, outputs[-1], states[-1], filters=filters, dropout=dropout, encoder_out=encoding)
 
             outputs.append(output)
             states.append(state)
@@ -220,7 +224,7 @@ def forward_prop(model, sequence, context=None, gen_seed=None, gen_iterations=No
     return outputs
 
 
-def forward_prop_t(model, sequence_t, context_t, filters, dropout, encoder_out=None):
+def forward_prop_t(model, sequence_t, context_t, filters, dropout, encoder_out):
     produced_outputs = []
     produced_context = []
 
@@ -229,14 +233,6 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, encoder_out=N
     layer = model[0]
     state = context_t[0]
     input = torch.stack(sequence_t, 0)
-
-    if encoder_out is not None:
-        enc_out_padded = []
-        for t in range(max_prop_time):
-            try: enc_out_padded.append(sum(encoder_out[t]))
-            except: enc_out_padded.append(torch.zeros(vector_size,requires_grad=False))
-        encoder_out = torch.stack(enc_out_padded, 0)
-    else: encoder_out = torch.stack([torch.zeros(vector_size,requires_grad=False)] * max_prop_time, 0)
 
     remember = torch.sigmoid(
         torch.matmul(layer['vr'], input) +
@@ -442,6 +438,19 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, encoder_out=N
 
 
     return produced_outputs, produced_context
+
+
+def generate_encoding(encoder_outs=None):
+    if encoder_outs is None:
+        return torch.stack([torch.zeros(vector_size, requires_grad=False)] * max_prop_time, 0)
+    else:
+        enc_out_padded = []
+        for t in range(max_prop_time):
+            try:
+                enc_out_padded.append(sum(encoder_outs[t]))
+            except:
+                enc_out_padded.append(torch.zeros(vector_size, requires_grad=False))
+        return torch.stack(enc_out_padded, 0)
 
 
 #   Math Operations

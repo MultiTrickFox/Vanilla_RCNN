@@ -47,10 +47,10 @@ def bootstrap(input_sequence=None):
             for resp_conv, resp_act in zip(converted_response, response):
 
                 print('---')
-                print(' Notes:', resp_conv[0], resp_act[0])
-                print(' Octaves:', resp_conv[1], resp_act[1])
-                print(' Durations:', resp_conv[2], resp_act[2])
-                print(' Velocities:', resp_conv[3], resp_act[3])
+                print(' Notes:', resp_conv[0], resp_act[0], end=" ")
+                print(' Octaves:', resp_conv[1], resp_act[1], end=" ")
+                print(' Durations:', resp_conv[2], resp_act[2], end=" ")
+                print(' Velocities:', resp_conv[3], resp_act[3], end=" ")
                 print('---')
                 
                 for e in resp_act:
