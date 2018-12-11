@@ -207,11 +207,12 @@ def revert_to_before_session():
         print(f'> latest session : {last_sess_item}')
 
         if input(f'Restore {last_sess_item} -> model.pkl? y/n: ').lower() == 'y':
-            remove_intermediate_data()
-            try:
+
+            try: os.remove('model.pkl')
+            except: pass
+            finally:
                 os.rename(last_sess_item, 'model.pkl')
                 print('restored.')
-            except: print('FAILED HERE')                    # todo : do not fail here.
 
     else: print("No previous session data found.")
 
