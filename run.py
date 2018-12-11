@@ -13,20 +13,22 @@ from glob import glob
 
 def main():
 
-    currdir = os.path.dirname(sys.argv[0])
-    os.chdir(os.path.abspath(currdir))
+    set_dir()
     clear_sc()
 
     while True:
+
         display_options()
         inp = input('\n> input: ')
         clear_sc()
 
         if inp == '1' or inp.startswith('s'):
-            print(f'> {resources.get_datasize(parent.data_path)}')
+            datasize = resources.get_datasize(parent.data_path)
+            print(f'> {datasize}')
             
         elif inp == '2' or inp.startswith('p'):
-            preproc.bootstrap()
+            new_datasize = preproc.bootstrap()
+            print(f'> {new_datasize}')
 
         elif inp == '3' or inp.startswith('t'):
 
@@ -41,21 +43,24 @@ def main():
             # inp optional args
 
             params, args = [], []
+
             print('> optional args: ')
-            while(True):
+            while True:
                 inp = input('(hit enter when done) ')
                 if inp == '':
                     break
                 else:
                     try:
+
                         stuff = inp.split(" ")
                         for s in stuff:
                             arr = s.split("=")
-                            if (len(arr) == 2): 
+
+                            if len(arr) == 2:
                                 params.append(arr[0])
                                 args.append(arr[1])
-                            else: print("correct format: param1=arg1 param2=arg2 ..")
-                    except Exception as e: print("correct format: param1=arg1 param2=arg2 ..")
+
+                    except: print("correct format: param1=arg1 param2=arg2 ..")
 
             # connections to parent
 
@@ -87,31 +92,36 @@ def main():
         elif inp.startswith('d'):
             
             display_debug_options()
-
             inp = input('\n> debug-input: ')
             clear_sc()
 
             if inp == '1':
                 try:
-                    restore_from_checkpoint()
+                    restore_from_latest_ckpt()
                     print('done.')
                 except Exception as e: print('Op error: ', e)
 
-            elif inp == '2' and input('Removes intermediate files, continue? (y/n): ').lower() == 'y':
+            if inp == '2':
+                try:
+                    revert_to_before_session()
+                    print('done.')
+                except Exception as e: print('Op error: ', e)
+
+            elif inp == '3' and input('Removes intermediate files, continue? (y/n): ').lower() == 'y':
                 try:
                     remove_intermediate_data()
                     print('done.')
                 except Exception as e: print('Op error: ', e)
 
             
-            elif inp == '3' and input('Removes processed work, continue? (y/n): ').lower() == 'y':
+            elif inp == '4' and input('Removes processed work, continue? (y/n): ').lower() == 'y':
                 try:
                     remove_preprocess_data()
                     print('done.')
                 except Exception as e: print('Op error: ', e)
 
 
-            if inp == '4' and input('Cleans up model data continue? (y/n): ').lower() == 'y':
+            if inp == '5' and input('Cleans up model data continue? (y/n): ').lower() == 'y':
                 try:
                     remove_training_data()
                     print('done.')
@@ -137,14 +147,20 @@ def display_options():
     print('---------')
 
 def display_debug_options():
-
+#     def restore_from_whole_session_before:
+# def restore_from_last_session_checkpoint():
     print('\n \t\t Debug Menu: \n')
-    print('1 - Restore from latest checkpoint.')
-    print('2 - Clear checkpoints.')
-    print('3 - Clear .pkls')
-    print('4 - Remove model. ')
+    print('1 - Update from latest checkpoint.')
+    print('2 - Revert to previous session.')
+    print('3 - Clear checkpoints.')
+    print('4 - Clear .pkls')
+    print('5 - Remove model. ')
     print('0- return.')
     print('---------')
+
+def set_dir():
+    currdir = os.path.dirname(sys.argv[0])
+    os.chdir(os.path.abspath(currdir))
 
 def clear_sc():
     os.system("cls" if platform.system().lower() == "windows" else "clear")
@@ -153,18 +169,19 @@ def clear_sc():
 
 main_files = ['model.pkl',
               'model_accugrads.pkl',
-              'model_moments.pkl',
-              'meta.pkl']
+              'model_moments.pkl']
 
 intermediate_files = ['model0*.pkl',
                       'model_accugrads0*.pkl',
-                      'model_moments0*.pkl',
-                      'meta0*.pkl']
+                      'model_moments0*.pkl']
 
 all_model_files = ['model*.pkl']
 
+session_model_files = ['model_before_simple.pkl',
+                       'model_before_advanced.pkl']
 
-def restore_from_checkpoint():
+
+def restore_from_latest_ckpt():
     ckpts = []
     
     for file in intermediate_files:
@@ -176,7 +193,23 @@ def restore_from_checkpoint():
             try: os.remove(name)
             except: pass
             os.rename(item, name)
-            print(f'restored.')
+            print('restored.')
+
+def revert_to_before_session():
+    sess_files = []
+
+    for item in session_model_files:
+        sess_files.extend(glob(item))
+
+    if sess_files != []:
+        last_sess_item = max(sess_files, key=os.path.getmtime)
+
+        if input (f'Restore {last_sess_item} -> model.pkl? y/n: ').lower() == 'y':
+            remove_intermediate_data()
+            os.rename(last_sess_item, 'model.pkl')
+            print('restored.')
+
+    else: print("No previous session data found.")
 
 def remove_training_data():
     import os.path
