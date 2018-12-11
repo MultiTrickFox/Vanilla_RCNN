@@ -116,7 +116,7 @@ def main():
             
             elif inp == '4' and input('Removes processed work, continue? (y/n): ').lower() == 'y':
                 try:
-                    remove_preprocess_data()
+                    remove_preprocessed_data()
                     print('done.')
                 except Exception as e: print('Op error: ', e)
 
@@ -147,8 +147,7 @@ def display_options():
     print('---------')
 
 def display_debug_options():
-#     def restore_from_whole_session_before:
-# def restore_from_last_session_checkpoint():
+
     print('\n \t\t Debug Menu: \n')
     print('1 - Update from latest checkpoint.')
     print('2 - Revert to previous session.')
@@ -202,12 +201,17 @@ def revert_to_before_session():
         sess_files.extend(glob(item))
 
     if sess_files != []:
-        last_sess_item = max(sess_files, key=os.path.getmtime)
 
-        if input (f'Restore {last_sess_item} -> model.pkl? y/n: ').lower() == 'y':
+        print(f'> found file(s)  : {sess_files}')
+        last_sess_item = max(sess_files, key=os.path.getmtime)
+        print(f'> latest session : {last_sess_item}')
+
+        if input(f'Restore {last_sess_item} -> model.pkl? y/n: ').lower() == 'y':
             remove_intermediate_data()
-            os.rename(last_sess_item, 'model.pkl')
-            print('restored.')
+            try:
+                os.rename(last_sess_item, 'model.pkl')
+                print('restored.')
+            except: print('FAILED HERE')                    # todo : do not fail here.
 
     else: print("No previous session data found.")
 
@@ -222,7 +226,7 @@ def remove_training_data():
             os.remove(e)
             print(f'removed {e}.')
 
-def remove_preprocess_data():
+def remove_preprocessed_data():
     to_remove = glob('sample*.pkl')
     for e in to_remove:
         os.remove(e)
