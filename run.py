@@ -98,33 +98,28 @@ def main():
             if inp == '1':
                 try:
                     restore_from_latest_ckpt()
-                    print('done.')
                 except Exception as e: print('Op error: ', e)
 
             if inp == '2':
                 try:
                     revert_to_before_session()
-                    print('done.')
                 except Exception as e: print('Op error: ', e)
 
             elif inp == '3' and input('Removes intermediate files, continue? (y/n): ').lower() == 'y':
                 try:
                     remove_intermediate_data()
-                    print('done.')
                 except Exception as e: print('Op error: ', e)
 
             
             elif inp == '4' and input('Removes processed work, continue? (y/n): ').lower() == 'y':
                 try:
                     remove_preprocessed_data()
-                    print('done.')
                 except Exception as e: print('Op error: ', e)
 
 
             if inp == '5' and input('Cleans up model data continue? (y/n): ').lower() == 'y':
                 try:
                     remove_training_data()
-                    print('done.')
                 except Exception as e: print('Op error: ', e)
 
 
@@ -202,10 +197,7 @@ def revert_to_before_session():
 
     if sess_files != []:
 
-        print(f'> found file(s)  : {sess_files}')
         last_sess_item = max(sess_files, key=os.path.getmtime)
-        print(f'> latest session : {last_sess_item}')
-
         if input(f'Restore {last_sess_item} -> model.pkl? y/n: ').lower() == 'y':
 
             try: os.remove('model.pkl')

@@ -8,8 +8,8 @@ vector_size = 13
 max_prop_time = 55
 
 MAX_DURATION = 8
-SPLIT_DURATION_R = 3
-SPLIT_DURATION_N = 4
+SPLIT_DURATION_R = 4
+SPLIT_DURATION_N = 6
 
 default_layers = (8, 5, 10)
 
