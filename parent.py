@@ -65,7 +65,7 @@ loss_initial = \
 
 
 
-def simple_parenting(model, accugrads, data, last_loss):
+def simple_parenting(model, accugrads, data):
 
 
         # initial conditions
@@ -166,7 +166,7 @@ def simple_parenting(model, accugrads, data, last_loss):
 
 
 
-def advanced_parenting(model, accugrads, moments, data, last_loss):
+def advanced_parenting(model, accugrads, moments, data):
 
 
         # initial conditions
@@ -280,7 +280,7 @@ def save_checkpoint(step, save_id=None):
         elif _ == 2: trainer.save_moments(e, save_id)
 
     save_id = "" if save_id is None else str(save_id)
-    resources.pickle_save(step[-1], 'meta'+save_id+'.pkl')
+    # resources.pickle_save(step[-1], 'meta'+save_id+'.pkl')
 
 import os
 def cleanup_past_moments():
@@ -302,13 +302,13 @@ def run_simple_parenting(data):
         resources.save_model(model, '_before_simple')
 
     # initialize metadata
-    last_loss = resources.pickle_load('meta.pkl')
-    if last_loss is None: last_loss = loss_initial
-    else: last_loss = [[e if e>0 else 999_999] for e in last_loss[0]]
+    # last_loss = resources.pickle_load('meta.pkl')
+    # if last_loss is None: last_loss = loss_initial
+    # else: last_loss = [[e if e>0 else 999_999] for e in last_loss[0]]
     accugrads = trainer.load_accugrads(model)
 
     # get checkpoints
-    checkpoints = simple_parenting(model, accugrads, data, last_loss)
+    checkpoints = simple_parenting(model, accugrads, data)
     save_checkpoint(checkpoints[-1], save_id=None)
 
     # # extract metadata
@@ -330,14 +330,14 @@ def run_advanced_parenting(data):
         resources.save_model(model, '_before_advanced')
 
     # initalize metadata
-    last_loss = resources.pickle_load('meta.pkl')
-    if last_loss is None: last_loss = loss_initial
-    else: last_loss = [[e if e>0 else 999_999] for e in last_loss[0]]
+    # last_loss = resources.pickle_load('meta.pkl')
+    # if last_loss is None: last_loss = loss_initial
+    # else: last_loss = [[e if e>0 else 999_999] for e in last_loss[0]]
     accugrads = trainer.load_accugrads(model)
     moments = trainer.load_moments(model)
 
     # get checkpoints
-    checkpoints = advanced_parenting(model, accugrads, moments, data, last_loss)
+    checkpoints = advanced_parenting(model, accugrads, moments, data)
     save_checkpoint(checkpoints[-1], save_id=None)
 
     # # extract metadata

@@ -1,15 +1,15 @@
 import torch
 import random
 
-import preproc
 
 hm_vectors = 4
 vector_size = 13
 
-max_prop_time = preproc.max_phrase_len
+max_prop_time = 55
 
 MAX_DURATION = 8
-SPLIT_DURATION = 2
+SPLIT_DURATION_R = 3
+SPLIT_DURATION_N = 4
 
 default_layers = (8, 5, 10)
 
@@ -593,7 +593,8 @@ def apply_grads(model, grads):
             ctr += 1
 
 
-scaled_stop_dur = SPLIT_DURATION / MAX_DURATION
+scaled_stop_r = SPLIT_DURATION_R / MAX_DURATION
+scaled_stop_n = SPLIT_DURATION_N / MAX_DURATION
 
 
 def stop_cond(output_t):
@@ -603,9 +604,10 @@ def stop_cond(output_t):
     
     isRest = True if \
         vocabs.argmax().item() == 12 else False
-    # for dur in durations[:-1]:
-    #     if dur.item() >= scaled_stop_dur:
-    #         return True
-    if isRest and durations[-1].item() >= scaled_stop_dur:
+    if isRest and durations[-1].item() >= scaled_stop_r:
         return True
+    else:
+        for dur in durations[:-1]:
+            if dur.item() >= scaled_stop_n:
+                return True
     return False

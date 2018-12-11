@@ -88,7 +88,23 @@ def ai_2_human(out_t, chord_mode=True, pick_thr=pick_thr):
 
     sel_vocabs = [_ for _,e in enumerate(vocabs) if e.item() >= pick_thr] \
         if chord_mode else [torch.argmax(vocabs).item()]
-    if sel_vocabs == []: sel_vocabs = [torch.argmax(vocabs).item()]
+    
+    if sel_vocabs == []:
+        
+        max_item_1 = None
+        max_item_2 = None
+        max_val_1 = 0.0
+        max_val_2 = 0.0
+        
+        for _,e in enumerate(vocabs):
+            if e.item() > max_val_1:
+                max_val_1 = e.item()
+                max_item_1 = _
+            elif e.item() > max_val_2:
+                max_val_2 = e.item()
+                max_item_2 = _
+        
+        sel_vocabs = [max_item_1, max_item_2]
 
     for vocab in sel_vocabs:
         sel_octs.append(round(float(octaves[vocab]) * max_octave))
@@ -143,7 +159,7 @@ def write_response_txt(response_t):
         for result_element in response_t:
             result_element = "".join([str(float(e))+"," for e in result_element])
             file.write(result_element+";")
-        file.write('\n')
+        file.write('\n\n')
             # file.write(e.detach().numpy())
 
 
