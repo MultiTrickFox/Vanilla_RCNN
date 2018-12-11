@@ -54,7 +54,6 @@ branch_ctr_max = 5
 really_random_data = True
 
 only_loss_on = None
-loss_multipliers = (1, 1, 1, 1)
 
 
     # global declarations
@@ -372,7 +371,6 @@ def bootstrap(custom=False,ep=None,ds=None,bs=None):
     trainer.filters = filters
     trainer.dropout = dropout
     trainer.batch_size = batch_size
-    trainer.loss_multipliers = loss_multipliers
     trainer.which_loss = only_loss_on
 
     # display details

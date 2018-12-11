@@ -94,7 +94,6 @@ def train_rms(model, accu_grads, data, num_epochs=1):
 
         losses.append(epoch_loss)
 
-        #print([round(e,3) for e in epoch_loss])
         print(f'trainer loss: {epoch_loss}')
 
     return model, accu_grads, losses

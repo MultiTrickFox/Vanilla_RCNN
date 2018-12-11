@@ -26,8 +26,6 @@ default_filters = (
 
 )
 
-default_loss_multipliers = (1, 1, 1, 1)
-
 
 #   Structure
 
@@ -495,13 +493,10 @@ def default_loss_fn(output_seq, label_seq, which_loss=None):
 #   Optimization
 
 
-def update_gradients(sequence_loss, loss_multipliers=default_loss_multipliers):
-    for _, node in enumerate(sequence_loss):
-        multiplier = torch.Tensor([loss_multipliers[_]])
+def update_gradients(sequence_loss):
+    for node in sequence_loss:
         for time_step in node:
-            time_step.backward(retain_graph=True,
-                               gradient=multiplier
-                               )
+            time_step.backward(retain_graph=True)
 
 
 def update_model(model, batch_size=1, learning_rate=0.001):
