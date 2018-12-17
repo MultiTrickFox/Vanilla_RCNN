@@ -392,7 +392,7 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, encoder_out):
                 output = (attention * torch.tanh(state))
                 decision_outputs[-1].append(output)
 
-                out = torch.sigmoid(torch.matmul(output, layer['wo' + str_]) + layer['bo' + str_])
+                out = torch.matmul(output, layer['wo' + str_]) + layer['bo' + str_]
                 produced_outputs.append(out.squeeze(dim=0))
 
 
@@ -435,6 +435,11 @@ def forward_prop_t(model, sequence_t, context_t, filters, dropout, encoder_out):
             decision_outputs[-1].append(output)
 
 
+    produced_outputs[0] = custom_softmax(produced_outputs[0])
+    produced_outputs[1] = torch.sigmoid(produced_outputs[1])
+    produced_outputs[2] = torch.sigmoid(produced_outputs[2])
+    produced_outputs[3] = torch.sigmoid(produced_outputs[3])
+    
     return produced_outputs, produced_context
 
 
@@ -488,6 +493,9 @@ def default_loss_fn(output_seq, label_seq, which_loss=None):
                 sequence_losses[_].append(loss.sum())
 
     return sequence_losses
+
+
+def custom_softmax(output_seq): return (lambda e_x: e_x / e_x.sum())(torch.exp(output_seq))
 
 
 #   Optimization

@@ -144,7 +144,7 @@ def display_options():
 def display_debug_options():
 
     print('\n \t\t Debug Menu: \n')
-    print('1 - Update from latest checkpoint.')
+    print('1 - Update from last checkpoint.')
     print('2 - Revert to previous session.')
     print('3 - Clear checkpoints.')
     print('4 - Clear .pkls')
