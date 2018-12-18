@@ -67,7 +67,7 @@ def bootstrap(input_sequence=None):
         converted_response = [conv(out_t) for out_t in response]
 
         if write_response: [write_response_txt(t) for t in response]
-
+    import interact_result; interact_result.print_music(converted_response) # todo : obviously move .
     return converted_response
     
 
