@@ -37,8 +37,8 @@ def print_music(converted_output):
     thisstream = stream.Stream()
     thisstream.timeSignature = meter.TimeSignature('4/4')
     thisstream.insert(0, metadata.Metadata(
-        # title='sent from my ai',
-        composer='vanilla ai'))
+        title='vanilla ai',
+        composer='sent from my ai'))
 
     for timestep in converted_output:
 

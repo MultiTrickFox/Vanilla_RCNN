@@ -90,21 +90,26 @@ def ai_2_human(out_t, chord_mode=True, pick_thr=pick_thr):
         if chord_mode else [torch.argmax(vocabs).item()]
     
     if sel_vocabs == []:
+
+        first, second, third = 0,0,0
+        first_i, second_i, third_i = 0,0,0
+
+
+        for _,v in enumerate(vocabs):
+
+            if v > first:
+                third = second ; third_i = second_i
+                second = first ; second_i = first_i
+                first = v      ; first_i = _
+
+            elif v > second:
+                third = second ; third_i = second_i
+                second = v     ; second_i = _
+
+            elif v > third:
+                third = v      ; third_i = _
         
-        max_item_1 = None
-        max_item_2 = None
-        max_val_1 = 0.0
-        max_val_2 = 0.0
-        
-        for _,e in enumerate(vocabs):
-            if e.item() > max_val_1:
-                max_val_1 = e.item()
-                max_item_1 = _
-            elif e.item() > max_val_2:
-                max_val_2 = e.item()
-                max_item_2 = _
-        
-        sel_vocabs = [max_item_1, max_item_2]
+        sel_vocabs = [first_i, second_i, third_i]
 
     for vocab in sel_vocabs:
         sel_octs.append(round(float(octaves[vocab]) * max_octave))
