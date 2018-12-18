@@ -20,7 +20,7 @@ requirements:
 
 >python version >= 3.6: https://www.python.org/downloads/release/python-367/
 
->built on torch 0.4.0, provided @ (Mac OS X: pip3 install torch=0.4.0 & Windows: pip3 install
+>built on torch 0.4.0, provided @ (Mac OS X: pip3 install torch==0.4.0 & Windows: pip3 install
 http://download.pytorch.org/whl/cu90/torch-0.4.0-cp36-cp36m-win_amd64.whl - python3.6 version only.)
 
 >also music21 v5.1.0 is required for preprocess

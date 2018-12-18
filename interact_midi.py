@@ -5,9 +5,9 @@ import glob
 
 
 
-def bootstrap():
+def bootstrap(noprint=False):
 
-
+    response = None
     try:
 
         file = glob.glob("*.mid")[-1]
@@ -37,16 +37,18 @@ def bootstrap():
 
             response = interact_debug.bootstrap(data)
 
-            print("-----")
-            for resp_step in response:
-                for stuff in resp_step:
-                    print(stuff)
+            if not noprint:
                 print("-----")
+                for resp_step in response:
+                    for stuff in resp_step:
+                        print(stuff)
+                    print("-----")
 
         else: print('Error : No midi information was extracted.')
 
     except Exception as e: print('Error : No response could be generated.',e)
 
+    return response
 
 
 

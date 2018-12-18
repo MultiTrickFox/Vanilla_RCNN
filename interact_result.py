@@ -2,34 +2,14 @@ from music21 import note, chord
 from music21 import meter, stream
 from music21 import metadata
 
+import interact_midi
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+def bootstrap():
+    response = interact_midi.bootstrap(noprint=True)
+    if response is not None:
+        print_music(response)
 
 
 def print_music(converted_output):
@@ -59,3 +39,7 @@ def print_music(converted_output):
 
     thisstream.show()
     thisstream.plot(title='my musiplot')
+
+
+if __name__ == '__main__':
+    bootstrap()

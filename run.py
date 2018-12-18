@@ -1,8 +1,10 @@
 import preproc
 import resources
 import parent
+
 import interact_debug
 import interact_midi
+import interact_result
 
 import sys, os
 import platform
@@ -80,8 +82,7 @@ def main():
             interact_midi.bootstrap()
 
         elif inp == '5' or inp.startswith('i'):
-            # interact.bootstrap() # will come someday
-            pass
+            interact_result.bootstrap()
 
         elif inp.startswith('g'):
             resources.graph_bootstrap()

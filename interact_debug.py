@@ -15,7 +15,7 @@ write_response = True
 
 
 
-def bootstrap(input_sequence=None):
+def bootstrap(input_sequence=None, noprint=False):
     global pick_thr
 
     model = resources.load_model()
@@ -46,12 +46,13 @@ def bootstrap(input_sequence=None):
 
             for resp_conv, resp_act in zip(converted_response, response):
 
-                print('---')
-                print(' Notes:', resp_conv[0], resp_act[0], end=" ")
-                print(' Octaves:', resp_conv[1], resp_act[1], end=" ")
-                print(' Durations:', resp_conv[2], resp_act[2], end=" ")
-                print(' Velocities:', resp_conv[3], resp_act[3], end=" ")
-                print('---')
+                if not noprint:
+                    print('---')
+                    print(' Notes:', resp_conv[0], resp_act[0], end=" ")
+                    print(' Octaves:', resp_conv[1], resp_act[1], end=" ")
+                    print(' Durations:', resp_conv[2], resp_act[2], end=" ")
+                    print(' Velocities:', resp_conv[3], resp_act[3], end=" ")
+                    print('---')
                 
                 for e in resp_act:
                     file.write(str(e.detach().numpy())+' \n')
@@ -67,7 +68,7 @@ def bootstrap(input_sequence=None):
         converted_response = [conv(out_t) for out_t in response]
 
         if write_response: [write_response_txt(t) for t in response]
-    import interact_result; interact_result.print_music(converted_response) # todo : obviously move .
+
     return converted_response
     
 
@@ -93,7 +94,6 @@ def ai_2_human(out_t, chord_mode=True, pick_thr=pick_thr):
 
         first, second, third = 0,0,0
         first_i, second_i, third_i = 0,0,0
-
 
         for _,v in enumerate(vocabs):
 
