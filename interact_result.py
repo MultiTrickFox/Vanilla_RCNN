@@ -7,7 +7,9 @@ import interact_midi
 
 
 def bootstrap():
-    response = interact_midi.bootstrap(noprint=True)
+    extra_prop = input('Song Creation Steps: ')
+    extra_prop = 0 if extra_prop == '' else int(extra_prop)
+    response = interact_midi.bootstrap(noprint=True, multipropogate=extra_prop)
     if response is not None:
         print_music(response)
 

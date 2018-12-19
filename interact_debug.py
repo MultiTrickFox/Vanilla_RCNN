@@ -15,7 +15,7 @@ write_response = True
 
 
 
-def bootstrap(input_sequence=None, noprint=False):
+def bootstrap(input_sequence=None, noprint=False, multipropogate=0):
     global pick_thr
 
     model = resources.load_model()
@@ -62,9 +62,15 @@ def bootstrap(input_sequence=None, noprint=False):
 
     else:
 
+        response = []
         # input_sequence = [[torch.Tensor(e) for e in sequence_t] for sequence_t in input_sequence]
         sequence = resources.tensorify_sequence(input_sequence)
-        response = Vanilla.forward_prop(model, sequence)
+        output = Vanilla.forward_prop(model, sequence)
+        response.extend(output)
+        for _ in range(multipropogate):
+            output = Vanilla.forward_prop(model, output)
+            response.extend(output)
+
         converted_response = [conv(out_t) for out_t in response]
 
         if write_response: [write_response_txt(t) for t in response]

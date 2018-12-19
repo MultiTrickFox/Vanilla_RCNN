@@ -5,7 +5,7 @@ import glob
 
 
 
-def bootstrap(noprint=False):
+def bootstrap(noprint=False, multipropogate=0):
 
     response = None
     try:
@@ -35,7 +35,7 @@ def bootstrap(noprint=False):
 
         if len(data) > 0:
 
-            response = interact_debug.bootstrap(data)
+            response = interact_debug.bootstrap(data, multipropogate=multipropogate)
 
             if not noprint:
                 print("-----")
